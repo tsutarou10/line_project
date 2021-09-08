@@ -37,7 +37,7 @@ func NewDynamo() *Dynamo {
 	}
 }
 
-func (d *Dynamo) Put(ctx context.Context, input entity.RegisterEntity) error {
+func (d *Dynamo) Put(ctx context.Context, input entity.UTNAEntityFood) error {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
@@ -55,7 +55,7 @@ func (d *Dynamo) Put(ctx context.Context, input entity.RegisterEntity) error {
 	return nil
 }
 
-func (d *Dynamo) Update(ctx context.Context, input entity.RegisterEntity) error {
+func (d *Dynamo) Update(ctx context.Context, input entity.UTNAEntityFood) error {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 	if err := d.utnaFood.Put(toModel(input, input.ID)).Run(); err != nil {
@@ -80,7 +80,7 @@ func (d *Dynamo) UpdateRegisterStatus(ctx context.Context, isAdd bool) error {
 	return nil
 }
 
-func (d *Dynamo) GetAll(ctx context.Context) ([]entity.RegisterEntity, error) {
+func (d *Dynamo) GetAll(ctx context.Context) ([]entity.UTNAEntityFood, error) {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
@@ -90,7 +90,7 @@ func (d *Dynamo) GetAll(ctx context.Context) ([]entity.RegisterEntity, error) {
 		return nil, err
 	}
 
-	var rsl []entity.RegisterEntity
+	var rsl []entity.UTNAEntityFood
 	for _, r := range resDynamo {
 		rsl = append(rsl, toEntity(r))
 	}
@@ -98,7 +98,7 @@ func (d *Dynamo) GetAll(ctx context.Context) ([]entity.RegisterEntity, error) {
 	return rsl, nil
 }
 
-func (d *Dynamo) Delete(ctx context.Context, id int64) (*entity.RegisterEntity, error) {
+func (d *Dynamo) Delete(ctx context.Context, id int64) (*entity.UTNAEntityFood, error) {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 

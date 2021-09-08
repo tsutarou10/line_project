@@ -44,7 +44,7 @@ func (c *Controller) RegisterController(ctx context.Context, req events.APIGatew
 		log.Printf("[ERROR]: %s, %s is invalidate url", utils.GetFuncName(), wc.ReceivedMessages[0])
 		return errors.New("invalidate url")
 	}
-	input := entity.RegisterEntity{
+	input := entity.UTNAEntityFood{
 		URL: wc.ReceivedMessages[0],
 	}
 	if len(wc.ReceivedMessages) > 1 {
@@ -112,7 +112,7 @@ func (c *Controller) UpdateController(ctx context.Context, req events.APIGateway
 		log.Printf("[ERROR]: %s. sm: %s", utils.GetFuncName(), "invalid id")
 		return errors.New("invalid id")
 	}
-	input := entity.RegisterEntity{
+	input := entity.UTNAEntityFood{
 		ID:  id,
 		URL: wc.ReceivedMessages[2],
 	}

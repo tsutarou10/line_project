@@ -7,15 +7,15 @@ import (
 )
 
 type InputPort interface {
-	HandleRegister(context.Context, entity.RegisterEntity) error
+	HandleRegister(context.Context, entity.UTNAEntityFood) error
 	HandleGetAll(context.Context) error
 	HandleDelete(context.Context, int64) error
-	HandleUpdate(context.Context, entity.RegisterEntity) error
+	HandleUpdate(context.Context, entity.UTNAEntityFood) error
 }
 
 type OutputPort interface {
-	EmitRegister(context.Context, entity.RegisterEntity)
-	EmitGetAll(context.Context, []entity.RegisterEntity)
-	EmitDelete(context.Context, entity.RegisterEntity)
-	EmitUpdate(context.Context, entity.RegisterEntity)
+	EmitRegister(context.Context, entity.UTNAEntityFood)
+	EmitGetAll(context.Context, []entity.UTNAEntityFood)
+	EmitDelete(context.Context, entity.UTNAEntityFood)
+	EmitUpdate(context.Context, entity.UTNAEntityFood)
 }

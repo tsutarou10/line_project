@@ -207,7 +207,7 @@ func raiseHandlerError(statusCode int, err error, req events.APIGatewayProxyRequ
 func convertReplyMessage(mp methodPackage, src interface{}) string {
 	res := ""
 	switch s := src.(type) {
-	case []entity.RegisterEntity:
+	case []entity.UTNAEntityFood:
 		for _, element := range s {
 			if element.Memo != "" {
 				res += fmt.Sprintf("・ %d: %s | %s\n", element.ID, element.URL, element.Memo)
@@ -215,7 +215,7 @@ func convertReplyMessage(mp methodPackage, src interface{}) string {
 				res += fmt.Sprintf("・ %d: %s\n", element.ID, element.URL)
 			}
 		}
-	case entity.RegisterEntity:
+	case entity.UTNAEntityFood:
 		switch mp.Method {
 		case "delete":
 			if s.Memo != "" {

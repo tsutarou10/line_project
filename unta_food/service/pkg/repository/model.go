@@ -21,7 +21,7 @@ type utnaFoodRegisterStatus struct {
 	UpdatedAt int64  `dynamo:"updatedAt"`
 }
 
-func toModel(input entity.RegisterEntity, id int64) utnaFoodSchema {
+func toModel(input entity.UTNAEntityFood, id int64) utnaFoodSchema {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
@@ -33,11 +33,11 @@ func toModel(input entity.RegisterEntity, id int64) utnaFoodSchema {
 	}
 }
 
-func toEntity(input utnaFoodSchema) entity.RegisterEntity {
+func toEntity(input utnaFoodSchema) entity.UTNAEntityFood {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
-	return entity.RegisterEntity{
+	return entity.UTNAEntityFood{
 		ID:   input.ID,
 		URL:  input.URL,
 		Memo: input.Memo,

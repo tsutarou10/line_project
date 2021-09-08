@@ -26,7 +26,7 @@ func NewPresenter() *Presenter {
 	}
 }
 
-func (p *Presenter) EmitRegister(ctx context.Context, output entity.RegisterEntity) {
+func (p *Presenter) EmitRegister(ctx context.Context, output entity.UTNAEntityFood) {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
@@ -42,7 +42,7 @@ func (p *Presenter) WaitForRegisterCompleted(ctx context.Context) (interface{}, 
 	return <-p.registerCh, nil
 }
 
-func (p *Presenter) EmitGetAll(ctx context.Context, output []entity.RegisterEntity) {
+func (p *Presenter) EmitGetAll(ctx context.Context, output []entity.UTNAEntityFood) {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
@@ -61,7 +61,7 @@ func (p *Presenter) WaitForGetAllCompleted(ctx context.Context) (interface{}, er
 	return <-p.getAllCh, nil
 }
 
-func (p *Presenter) EmitDelete(ctx context.Context, output entity.RegisterEntity) {
+func (p *Presenter) EmitDelete(ctx context.Context, output entity.UTNAEntityFood) {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
@@ -77,7 +77,7 @@ func (p *Presenter) WaitForDeleteCompleted(ctx context.Context) (interface{}, er
 	return <-p.deleteCh, nil
 }
 
-func (p *Presenter) EmitUpdate(ctx context.Context, output entity.RegisterEntity) {
+func (p *Presenter) EmitUpdate(ctx context.Context, output entity.UTNAEntityFood) {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 

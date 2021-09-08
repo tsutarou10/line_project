@@ -28,7 +28,7 @@ func NewInputPort(
 	}
 }
 
-func (i *interactor) HandleRegister(ctx context.Context, input entity.RegisterEntity) error {
+func (i *interactor) HandleRegister(ctx context.Context, input entity.UTNAEntityFood) error {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
@@ -74,7 +74,7 @@ func (i *interactor) HandleDelete(ctx context.Context, id int64) error {
 	return nil
 }
 
-func (i *interactor) HandleUpdate(ctx context.Context, src entity.RegisterEntity) error {
+func (i *interactor) HandleUpdate(ctx context.Context, src entity.UTNAEntityFood) error {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
