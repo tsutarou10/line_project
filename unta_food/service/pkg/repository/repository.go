@@ -52,7 +52,18 @@ func (d *Dynamo) Put(ctx context.Context, input entity.RegisterEntity) error {
 		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
 		return err
 	}
-	if err := d.putRegisterStatus(ctx, rs.Number+1); err != nil {
+	return nil
+}
+
+func (d *Dynamo) UpdateRegisterStatus(ctx context.Context, isAdd bool) error {
+	rs := d.getRegisterStatus(ctx)
+
+	if isAdd {
+		rs.Number += 1
+	} else {
+		rs.Number -= 1
+	}
+	if err := d.putRegisterStatus(ctx, rs.Number); err != nil {
 		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
 		return err
 	}
@@ -75,6 +86,19 @@ func (d *Dynamo) GetAll(ctx context.Context) ([]entity.RegisterEntity, error) {
 	}
 
 	return rsl, nil
+}
+
+func (d *Dynamo) Delete(ctx context.Context, id int64) (*entity.RegisterEntity, error) {
+	log.Printf("[START] :%s", utils.GetFuncName())
+	defer log.Printf("[END] :%s", utils.GetFuncName())
+
+	var oldValue utnaFoodSchema
+	err := d.utnaFood.Delete("id", id).OldValue(&oldValue)
+	if err != nil {
+		return nil, err
+	}
+	res := toEntity(oldValue)
+	return &res, nil
 }
 
 func (d *Dynamo) getRegisterStatus(ctx context.Context) utnaFoodRegisterStatus {

@@ -17,6 +17,7 @@ func GetFuncName() string {
 
 	return funcName
 }
+
 func SplitMultiSep(s string, sep []string) []string {
 	var ret []string
 	ret = strings.Split(s, sep[0])

@@ -21,7 +21,8 @@ import (
 )
 
 type methodPackage struct {
-	Foc func(context.Context, events.APIGatewayProxyRequest) (interface{}, error)
+	Foc    func(context.Context, events.APIGatewayProxyRequest) (interface{}, error)
+	Method string
 }
 
 func NewHandler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
@@ -41,9 +42,9 @@ func NewHandler(ctx context.Context, request events.APIGatewayProxyRequest) (eve
 		return raiseHandlerError(500, err, request)
 	}
 
-	msg := convertReplyMessage(out)
+	msg := convertReplyMessage(*mp, out)
 	utils.ReplyMessageUsingAPIGWRequest(request, msg)
-	return newAPIGatewayProxyReseponse(201, nil, request), nil
+	return newAPIGatewayProxyReseponse(200, nil, request), nil
 }
 
 func newAPIGatewayProxyReseponse(statusCode int, err error, request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
@@ -103,6 +104,7 @@ func printHelp(ctx context.Context, req events.APIGatewayProxyRequest) (interfac
 	wc := utils.ExtractWebhookContext(*wh)
 	msg := `get: 登録された飲食店の URL とメモを取得できます。
 URL メモ: 飲食店の URL とそのメモを登録できます。（メモは任意)
+delete id: 該当する id の飲食店を削除します。id は get コマンドで確認できます。
 `
 	return nil, utils.ReplyMessage(*wc, msg)
 }
@@ -119,6 +121,20 @@ func getAllHandler(ctx context.Context, req events.APIGatewayProxyRequest) (inte
 		return nil, err
 	}
 	return p.WaitForGetAllCompleted(ctx)
+}
+
+func deleteHandler(ctx context.Context, req events.APIGatewayProxyRequest) (interface{}, error) {
+	log.Printf("[START] :%s", utils.GetFuncName())
+	defer log.Printf("[END] :%s", utils.GetFuncName())
+
+	c, p := setupAPIGatewayAdapter()
+	log.Printf("%s, %s", utils.GetFuncName(), req.Body)
+	if err := c.DeleteController(ctx, req); err != nil {
+		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
+		utils.ReplyMessageUsingAPIGWRequest(req, err.Error())
+		return nil, err
+	}
+	return p.WaitForDeleteCompleted(ctx)
 }
 
 func setupAPIGatewayAdapter() (*controller.Controller, *presenter.Presenter) {
@@ -146,10 +162,16 @@ func createMethodPackage(req events.APIGatewayProxyRequest) (*methodPackage, err
 	switch wc.ReceivedMessages[0] {
 	case "get":
 		mp.Foc = getAllHandler
+		mp.Method = "get"
+	case "delete":
+		mp.Foc = deleteHandler
+		mp.Method = "delete"
 	case "help", "ヘルプ":
 		mp.Foc = printHelp
+		mp.Method = "help"
 	default:
 		mp.Foc = registerHandler
+		mp.Method = "default"
 	}
 	return &mp, nil
 }
@@ -160,7 +182,7 @@ func raiseHandlerError(statusCode int, err error, req events.APIGatewayProxyRequ
 	return newAPIGatewayProxyReseponse(statusCode, err, req), err
 }
 
-func convertReplyMessage(src interface{}) string {
+func convertReplyMessage(mp methodPackage, src interface{}) string {
 	res := ""
 	switch s := src.(type) {
 	case []entity.RegisterEntity:
@@ -168,11 +190,20 @@ func convertReplyMessage(src interface{}) string {
 			if element.Memo != "" {
 				res += fmt.Sprintf("・ %d: %s | %s\n", element.ID, element.URL, element.Memo)
 			} else {
-				res += fmt.Sprintf("・ %s\n", element.URL)
+				res += fmt.Sprintf("・ %d: %s\n", element.ID, element.URL)
 			}
 		}
 	case entity.RegisterEntity:
-		res = s.URL
+		switch mp.Method {
+		case "delete":
+			if s.Memo != "" {
+				res = fmt.Sprintf("deleted %s | %s", s.URL, s.Memo)
+			} else {
+				res = fmt.Sprintf("deleted %s", s.URL)
+			}
+		default:
+			res = s.URL
+		}
 	default:
 		res = "success"
 	}
