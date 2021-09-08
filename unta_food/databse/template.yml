@@ -1,0 +1,62 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: UTNA food databse stack
+
+Parameters:
+  UTNAFoodTableName:
+    Type: String
+  UTNAFoodRegistrationStatusTableName:
+    Type: String
+
+Resources:
+  UTNAFoodTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    Properties:
+      TableName: !Ref UTNAFoodTableName
+      SSESpecification:
+        SSEEnabled: false
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: N
+        - AttributeName: url
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: URLIndex
+          KeySchema:
+            - AttributeName: url
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      BillingMode: PAY_PER_REQUEST
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+  UTNAFoodRegistrationStatusTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    Properties:
+      TableName: !Ref UTNAFoodRegistrationStatusTableName
+      SSESpecification:
+        SSEEnabled: false
+      AttributeDefinitions:
+        - AttributeName: status
+          AttributeType: S
+      KeySchema:
+        - AttributeName: status
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+Outputs:
+  UTNAFoodTableName:
+    Value: !Ref UTNAFoodTable
+    Export:
+      Name: !Sub "${AWS::StackName}-UTNAFoodTableName"
+  UTNAFoodRegistrationStatusTableName:
+    Value: !Ref UTNAFoodRegistrationStatusTable
+    Export:
+      Name: !Sub "${AWS::StackName}-UTNAFoodRegistrationStatusTableName"
