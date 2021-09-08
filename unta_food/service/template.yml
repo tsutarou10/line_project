@@ -26,7 +26,7 @@ Resources:
       AuthorizationType: "None"
       HttpMethod: "POST"
       Integration:
-        Type: "AWS"
+        Type: "AWS_PROXY"
         IntegrationHttpMethod: "POST"
         Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${FunctionName}/invocations"
     DependsOn: LambdaPermission
