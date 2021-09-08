@@ -1,0 +1,98 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: LINE bot of UTNA Food service template
+
+Parameters:
+  FunctionName:
+    Type: String
+  TableName:
+    Type: String
+  APIName:
+    Type: String
+
+Resources:
+  RestAPI:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: "UTNAFoodAPI"
+      EndpointConfiguration:
+        Types:
+          - "REGIONAL"
+  ResourceMethod:
+    Type: "AWS::ApiGateway::Method"
+    Properties:
+      RestApiId: !Ref RestAPI
+      ResourceId: !GetAtt RestAPI.RootResourceId
+      AuthorizationType: "None"
+      HttpMethod: "POST"
+      Integration:
+        Type: "AWS"
+        IntegrationHttpMethod: "POST"
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${FunctionName}/invocations"
+    DependsOn: LambdaPermission
+  RestAPIDeployment:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId: !Ref RestAPI
+    DependsOn:
+      - ResourceMethod
+  APIStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      RestApiId: !Ref RestAPI
+      DeploymentId: !Ref RestAPIDeployment
+      StageName: "dev"
+    DependsOn:
+      - ResourceMethod
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: !Sub "${FunctionName}-dynamo-policy"
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "dynamodb:*"
+                Resource:
+                  - "*"
+
+      ManagedPolicyArns:
+      - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+      RoleName: !Sub "${FunctionName}-role"
+
+  UTNAFoodFunction:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      FunctionName: !Ref FunctionName
+      Handler: cmd/main
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: go1.x
+      MemorySize: 512
+      Timeout: 30
+      Environment:
+        Variables:
+          DYNAMODB_ENDPOINT: !Sub "https://dynamodb.${AWS::Region}1.amazonaws.com"
+          REGION: !Ref AWS::Region
+          LINE_BOT_CHANNEL_SECRET: "97774b24af8cb15e04f6d4136097a0b6"
+          LINE_BOT_CHANNEL_TOKEN: "sKMcF3AdnQk4Cw6DW1WHUpsucg3pIqCFTt/kdNxk/ukcZeHXfsIvxROw5nH4++ikufziHoYRKhnWTbqL1nR6Qn2SBC7YYzfNgzabR8xuJrSEjmSKdxsiXe9N3IGmsRYgxiZ/0mnh/Jpx0bwb+9nE/gdB04t89/1O/w1cDnyilFU="
+          TABLE_NAME: !Ref TableName
+
+  LambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName: !Ref FunctionName
+      Action: "lambda:InvokeFunction"
+      Principal: "apigateway.amazonaws.com"
+    DependsOn: UTNAFoodFunction
+
