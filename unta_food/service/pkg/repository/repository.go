@@ -55,6 +55,16 @@ func (d *Dynamo) Put(ctx context.Context, input entity.RegisterEntity) error {
 	return nil
 }
 
+func (d *Dynamo) Update(ctx context.Context, input entity.RegisterEntity) error {
+	log.Printf("[START] :%s", utils.GetFuncName())
+	defer log.Printf("[END] :%s", utils.GetFuncName())
+	if err := d.utnaFood.Put(toModel(input, input.ID)).Run(); err != nil {
+		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
+		return err
+	}
+	return nil
+}
+
 func (d *Dynamo) UpdateRegisterStatus(ctx context.Context, isAdd bool) error {
 	rs := d.getRegisterStatus(ctx)
 

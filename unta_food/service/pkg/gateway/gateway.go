@@ -10,5 +10,6 @@ type DynamoGateway interface {
 	Put(context.Context, entity.RegisterEntity) error
 	GetAll(context.Context) ([]entity.RegisterEntity, error)
 	Delete(context.Context, int64) (*entity.RegisterEntity, error)
+	Update(context.Context, entity.RegisterEntity) error
 	UpdateRegisterStatus(context.Context, bool) error
 }

@@ -40,7 +40,7 @@ func (i *interactor) HandleRegister(ctx context.Context, input entity.RegisterEn
 		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
 		return err
 	}
-	i.out.EmitRegister(ctx, "success")
+	i.out.EmitRegister(ctx, input)
 	return nil
 }
 
@@ -71,5 +71,17 @@ func (i *interactor) HandleDelete(ctx context.Context, id int64) error {
 		return err
 	}
 	i.out.EmitDelete(ctx, *res)
+	return nil
+}
+
+func (i *interactor) HandleUpdate(ctx context.Context, src entity.RegisterEntity) error {
+	log.Printf("[START] :%s", utils.GetFuncName())
+	defer log.Printf("[END] :%s", utils.GetFuncName())
+
+	if err := i.dynamo.Update(ctx, src); err != nil {
+		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
+		return err
+	}
+	i.out.EmitDelete(ctx, src)
 	return nil
 }

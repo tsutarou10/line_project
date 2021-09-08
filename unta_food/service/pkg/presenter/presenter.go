@@ -26,7 +26,7 @@ func NewPresenter() *Presenter {
 	}
 }
 
-func (p *Presenter) EmitRegister(ctx context.Context, output interface{}) {
+func (p *Presenter) EmitRegister(ctx context.Context, output entity.RegisterEntity) {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
@@ -71,6 +71,22 @@ func (p *Presenter) EmitDelete(ctx context.Context, output entity.RegisterEntity
 }
 
 func (p *Presenter) WaitForDeleteCompleted(ctx context.Context) (interface{}, error) {
+	log.Printf("[START] :%s", utils.GetFuncName())
+	defer log.Printf("[END] :%s", utils.GetFuncName())
+
+	return <-p.deleteCh, nil
+}
+
+func (p *Presenter) EmitUpdate(ctx context.Context, output entity.RegisterEntity) {
+	log.Printf("[START] :%s", utils.GetFuncName())
+	defer log.Printf("[END] :%s", utils.GetFuncName())
+
+	go func() {
+		p.deleteCh <- output
+	}()
+}
+
+func (p *Presenter) WaitForUpdateCompleted(ctx context.Context) (interface{}, error) {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 

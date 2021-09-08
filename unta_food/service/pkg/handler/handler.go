@@ -79,6 +79,20 @@ func validateSignature(channelSecret string, signature string, body []byte) bool
 	return hmac.Equal(decoded, hash.Sum(nil))
 }
 
+func updateHandler(ctx context.Context, req events.APIGatewayProxyRequest) (interface{}, error) {
+	log.Printf("[START] :%s", utils.GetFuncName())
+	defer log.Printf("[END] :%s", utils.GetFuncName())
+
+	c, p := setupAPIGatewayAdapter()
+	log.Printf("%s, %s", utils.GetFuncName(), req.Body)
+	if err := c.UpdateController(ctx, req); err != nil {
+		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
+		utils.ReplyMessageUsingAPIGWRequest(req, err.Error())
+		return nil, err
+	}
+	return p.WaitForUpdateCompleted(ctx)
+}
+
 func registerHandler(ctx context.Context, req events.APIGatewayProxyRequest) (interface{}, error) {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
@@ -102,9 +116,14 @@ func printHelp(ctx context.Context, req events.APIGatewayProxyRequest) (interfac
 		raiseHandlerError(500, err, req)
 	}
 	wc := utils.ExtractWebhookContext(*wh)
-	msg := `get: 登録された飲食店の URL とメモを取得できます。
-URL メモ: 飲食店の URL とそのメモを登録できます。（メモは任意)
-delete id: 該当する id の飲食店を削除します。id は get コマンドで確認できます。
+	msg := `・get: 登録された飲食店の URL とメモを取得できます。
+		表示例 => id: URL | メモ
+
+・URL メモ: 飲食店の URL とそのメモを登録できます。（メモは任意)
+
+・update id url メモ: id で登録されている飲食店の情報を更新できます。id は get コマンドで確認できます。(メモは任意)
+
+・delete id: 該当する id の飲食店を削除します。id は get コマンドで確認できます。
 `
 	return nil, utils.ReplyMessage(*wc, msg)
 }
@@ -166,12 +185,15 @@ func createMethodPackage(req events.APIGatewayProxyRequest) (*methodPackage, err
 	case "delete":
 		mp.Foc = deleteHandler
 		mp.Method = "delete"
+	case "update":
+		mp.Foc = updateHandler
+		mp.Method = "update"
 	case "help", "ヘルプ":
 		mp.Foc = printHelp
 		mp.Method = "help"
 	default:
 		mp.Foc = registerHandler
-		mp.Method = "default"
+		mp.Method = "register"
 	}
 	return &mp, nil
 }
@@ -200,6 +222,18 @@ func convertReplyMessage(mp methodPackage, src interface{}) string {
 				res = fmt.Sprintf("deleted %s | %s", s.URL, s.Memo)
 			} else {
 				res = fmt.Sprintf("deleted %s", s.URL)
+			}
+		case "update":
+			if s.Memo != "" {
+				res = fmt.Sprintf("updated %s | %s", s.URL, s.Memo)
+			} else {
+				res = fmt.Sprintf("updated %s", s.URL)
+			}
+		case "register":
+			if s.Memo != "" {
+				res = fmt.Sprintf("registered %s | %s", s.URL, s.Memo)
+			} else {
+				res = fmt.Sprintf("registered %s", s.URL)
 			}
 		default:
 			res = s.URL
