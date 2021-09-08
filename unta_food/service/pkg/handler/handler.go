@@ -13,30 +13,37 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/tsutarou10/line_project/service/pkg/controller"
+	"github.com/tsutarou10/line_project/service/pkg/entity"
 	"github.com/tsutarou10/line_project/service/pkg/interactor"
 	"github.com/tsutarou10/line_project/service/pkg/presenter"
 	"github.com/tsutarou10/line_project/service/pkg/repository"
 	"github.com/tsutarou10/line_project/service/pkg/utils"
 )
 
+type methodPackage struct {
+	Foc func(context.Context, events.APIGatewayProxyRequest) (interface{}, error)
+}
+
 func NewHandler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
 	if !validateSignature(os.Getenv("LINE_BOT_CHANNEL_SECRET"), request.Headers["x-line-signature"], []byte(request.Body)) {
-		log.Printf("[ERROR]: %s, invalidate signature", utils.GetFuncName())
-		utils.ReplyMessageUsingAPIGWRequest(request, "invalidate signature")
-		return newAPIGatewayProxyReseponse(http.StatusBadRequest, errors.New("invalidate signature"), request), nil
+		return raiseHandlerError(http.StatusUnauthorized, errors.New("invalidate signature"), request)
 	}
 
-	_, err := registerHandler(ctx, request)
+	mp, err := createMethodPackage(request)
 	if err != nil {
-		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
-		utils.ReplyMessageUsingAPIGWRequest(request, err.Error())
-		return newAPIGatewayProxyReseponse(500, err, request), err
+		return raiseHandlerError(500, err, request)
 	}
-	utils.ReplyMessageUsingAPIGWRequest(request, "success")
-	return newAPIGatewayProxyReseponse(200, nil, request), nil
+	out, err := mp.Foc(ctx, request)
+	if err != nil {
+		return raiseHandlerError(500, err, request)
+	}
+
+	msg := convertReplyMessage(out)
+	utils.ReplyMessageUsingAPIGWRequest(request, msg)
+	return newAPIGatewayProxyReseponse(201, nil, request), nil
 }
 
 func newAPIGatewayProxyReseponse(statusCode int, err error, request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
@@ -85,6 +92,35 @@ func registerHandler(ctx context.Context, req events.APIGatewayProxyRequest) (in
 	return p.WaitForRegisterCompleted(ctx)
 }
 
+func printHelp(ctx context.Context, req events.APIGatewayProxyRequest) (interface{}, error) {
+	log.Printf("[START] :%s", utils.GetFuncName())
+	defer log.Printf("[END] :%s", utils.GetFuncName())
+
+	wh, err := utils.ExtractWebhook(req)
+	if err != nil {
+		raiseHandlerError(500, err, req)
+	}
+	wc := utils.ExtractWebhookContext(*wh)
+	msg := `get: 登録された飲食店の URL とメモを取得できます。
+URL メモ: 飲食店の URL とそのメモを登録できます。（メモは任意)
+`
+	return nil, utils.ReplyMessage(*wc, msg)
+}
+
+func getAllHandler(ctx context.Context, req events.APIGatewayProxyRequest) (interface{}, error) {
+	log.Printf("[START] :%s", utils.GetFuncName())
+	defer log.Printf("[END] :%s", utils.GetFuncName())
+
+	c, p := setupAPIGatewayAdapter()
+	log.Printf("%s, %s", utils.GetFuncName(), req.Body)
+	if err := c.GetAllController(ctx, req); err != nil {
+		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
+		utils.ReplyMessageUsingAPIGWRequest(req, err.Error())
+		return nil, err
+	}
+	return p.WaitForGetAllCompleted(ctx)
+}
+
 func setupAPIGatewayAdapter() (*controller.Controller, *presenter.Presenter) {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
@@ -97,4 +133,48 @@ func setupAPIGatewayAdapter() (*controller.Controller, *presenter.Presenter) {
 			dynamo,
 		))
 	return c, p
+}
+
+func createMethodPackage(req events.APIGatewayProxyRequest) (*methodPackage, error) {
+	wh, err := utils.ExtractWebhook(req)
+	if err != nil {
+		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
+		return nil, err
+	}
+	wc := utils.ExtractWebhookContext(*wh)
+	var mp methodPackage
+	switch wc.ReceivedMessages[0] {
+	case "get":
+		mp.Foc = getAllHandler
+	case "help", "ヘルプ":
+		mp.Foc = printHelp
+	default:
+		mp.Foc = registerHandler
+	}
+	return &mp, nil
+}
+
+func raiseHandlerError(statusCode int, err error, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
+	utils.ReplyMessageUsingAPIGWRequest(req, err.Error())
+	return newAPIGatewayProxyReseponse(statusCode, err, req), err
+}
+
+func convertReplyMessage(src interface{}) string {
+	res := ""
+	switch s := src.(type) {
+	case []entity.RegisterEntity:
+		for _, element := range s {
+			if element.Memo != "" {
+				res += fmt.Sprintf("・ %d: %s | %s\n", element.ID, element.URL, element.Memo)
+			} else {
+				res += fmt.Sprintf("・ %s\n", element.URL)
+			}
+		}
+	case entity.RegisterEntity:
+		res = s.URL
+	default:
+		res = "success"
+	}
+	return res
 }

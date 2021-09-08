@@ -16,8 +16,8 @@ type Webhook struct {
 }
 
 type WebhookContext struct {
-	ReceivedMessage string
-	ReplyToken      string
+	ReceivedMessages []string
+	ReplyToken       string
 }
 
 func ExtractWebhookContext(wh Webhook) *WebhookContext {
@@ -29,9 +29,10 @@ func ExtractWebhookContext(wh Webhook) *WebhookContext {
 		case linebot.EventTypeMessage:
 			switch m := event.Message.(type) {
 			case *linebot.TextMessage:
+				texts := SplitMultiSep(m.Text, []string{" ", "\n", "　"})
 				return &WebhookContext{
-					ReceivedMessage: m.Text,
-					ReplyToken:      event.ReplyToken,
+					ReceivedMessages: texts,
+					ReplyToken:       event.ReplyToken,
 				}
 			}
 		}
@@ -51,8 +52,6 @@ func ReplyMessage(wc WebhookContext, msg string) error {
 		log.Printf("[ERROR]: %s, %s", GetFuncName(), err.Error())
 		return err
 	}
-	log.Printf("ReplyToken: %s", wc.ReplyToken)
-	log.Printf("Message: %s", msg)
 	bot.ReplyMessage(wc.ReplyToken, linebot.NewTextMessage(msg)).Do()
 	return nil
 }

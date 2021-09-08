@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"net/url"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/tsutarou10/line_project/service/pkg/entity"
@@ -33,26 +34,35 @@ func (c *Controller) RegisterController(ctx context.Context, req events.APIGatew
 	}
 
 	wc := utils.ExtractWebhookContext(*webhook)
-	if wc == nil || len(wc.ReceivedMessage) == 0 {
+	if wc == nil || len(wc.ReceivedMessages) == 0 {
 		log.Printf("[ERROR]: %s. sm: %s", utils.GetFuncName(), "error")
 		return errors.New("error")
 	}
 
-	if !isURL(wc.ReceivedMessage) {
-		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), "invalidate url")
-		return errors.New("invalidate_url")
+	if !isURL(wc.ReceivedMessages[0]) {
+		log.Printf("[ERROR]: %s, %s is invalidate url", utils.GetFuncName(), wc.ReceivedMessages[0])
+		return errors.New("invalidate url")
 	}
 	input := entity.RegisterEntity{
-		URL: wc.ReceivedMessage,
+		URL: wc.ReceivedMessages[0],
+	}
+	if len(wc.ReceivedMessages) > 1 {
+		input.Memo = wc.ReceivedMessages[1]
 	}
 	return c.in.HandleRegister(ctx, input)
+}
+
+func (c *Controller) GetAllController(ctx context.Context, req events.APIGatewayProxyRequest) error {
+	log.Printf("[START] :%s", utils.GetFuncName())
+	defer log.Printf("[END] :%s", utils.GetFuncName())
+
+	return c.in.HandleGetAll(ctx)
 }
 
 func isURL(s string) bool {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
-	return false
 
-	//u, err := url.Parse(s)
-	//return err == nil && u.Scheme != "" && u.Host != ""
+	u, err := url.Parse(s)
+	return err == nil && u.Scheme != "" && u.Host != ""
 }

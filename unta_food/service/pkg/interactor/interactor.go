@@ -39,3 +39,16 @@ func (i *interactor) HandleRegister(ctx context.Context, input entity.RegisterEn
 	i.out.EmitRegister(ctx, "success")
 	return nil
 }
+
+func (i *interactor) HandleGetAll(ctx context.Context) error {
+	log.Printf("[START] :%s", utils.GetFuncName())
+	defer log.Printf("[END] :%s", utils.GetFuncName())
+
+	res, err := i.dynamo.GetAll(ctx)
+	if err != nil {
+		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
+		return err
+	}
+	i.out.EmitGetAll(ctx, res)
+	return nil
+}

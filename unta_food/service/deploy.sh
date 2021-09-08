@@ -27,8 +27,10 @@ aws cloudformation deploy \
   --capabilities CAPABILITY_NAMED_IAM \
   --parameter-overrides \
     FunctionName=${FUNCTION_NAME} \
-    TableName=${TABLE_NAME} \
-    APIName=${API_NAME}
+    UTNAFoodTableName=${UTNA_FOOD_TABLE_NAME} \
+		RegistrationStatusTableName=${REGISTRATION_STATUS_TABLE_NAME} \
+    APIName=${API_NAME} \
+		DatabaseStackName=${DATABASE_STACK_NAME}
 
 aws cloudformation describe-stacks \
   --region ${REGION} \

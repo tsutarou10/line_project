@@ -8,8 +8,10 @@ import (
 
 type InputPort interface {
 	HandleRegister(context.Context, entity.RegisterEntity) error
+	HandleGetAll(context.Context) error
 }
 
 type OutputPort interface {
 	EmitRegister(context.Context, interface{})
+	EmitGetAll(context.Context, []entity.RegisterEntity)
 }

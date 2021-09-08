@@ -8,4 +8,5 @@ import (
 
 type DynamoGateway interface {
 	Put(context.Context, entity.RegisterEntity) error
+	GetAll(context.Context) ([]entity.RegisterEntity, error)
 }
