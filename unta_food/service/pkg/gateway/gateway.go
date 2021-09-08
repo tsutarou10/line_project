@@ -7,9 +7,9 @@ import (
 )
 
 type DynamoGateway interface {
-	Put(context.Context, entity.RegisterEntity) error
-	GetAll(context.Context) ([]entity.RegisterEntity, error)
-	Delete(context.Context, int64) (*entity.RegisterEntity, error)
-	Update(context.Context, entity.RegisterEntity) error
+	Put(context.Context, entity.UTNAEntityFood) error
+	GetAll(context.Context) ([]entity.UTNAEntityFood, error)
+	Delete(context.Context, int64) (*entity.UTNAEntityFood, error)
+	Update(context.Context, entity.UTNAEntityFood) error
 	UpdateRegisterStatus(context.Context, bool) error
 }
