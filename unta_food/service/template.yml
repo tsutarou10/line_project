@@ -82,7 +82,7 @@ Resources:
       Timeout: 30
       Environment:
         Variables:
-          DYNAMODB_ENDPOINT: !Sub "https://dynamodb.${AWS::Region}1.amazonaws.com"
+          DYNAMODB_ENDPOINT: !Sub "https://dynamodb.${AWS::Region}.amazonaws.com"
           REGION: !Ref AWS::Region
           LINE_BOT_CHANNEL_SECRET: "97774b24af8cb15e04f6d4136097a0b6"
           LINE_BOT_CHANNEL_TOKEN: "sKMcF3AdnQk4Cw6DW1WHUpsucg3pIqCFTt/kdNxk/ukcZeHXfsIvxROw5nH4++ikufziHoYRKhnWTbqL1nR6Qn2SBC7YYzfNgzabR8xuJrSEjmSKdxsiXe9N3IGmsRYgxiZ/0mnh/Jpx0bwb+9nE/gdB04t89/1O/w1cDnyilFU="
