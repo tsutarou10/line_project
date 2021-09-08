@@ -1,4 +1,4 @@
-package repository
+package dynamo
 
 import (
 	"log"
@@ -8,24 +8,18 @@ import (
 	"github.com/tsutarou10/line_project/service/pkg/utils"
 )
 
-type utnaFoodSchema struct {
+type utnaFood struct {
 	ID        int64  `dynamo:"id"`
 	URL       string `dynamo:"url" index:"URLIndex"`
 	Memo      string `dynamo:"memo"`
 	UpdatedAt int64  `dynamo:"updatedAt"`
 }
 
-type utnaFoodRegisterStatus struct {
-	Status    string `dynamo:"status"`
-	Number    int64  `dynamo:"number"`
-	UpdatedAt int64  `dynamo:"updatedAt"`
-}
-
-func toModel(input entity.UTNAEntityFood, id int64) utnaFoodSchema {
+func toModel(input entity.UTNAEntityFood, id int64) utnaFood {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
-	return utnaFoodSchema{
+	return utnaFood{
 		ID:        id,
 		URL:       input.URL,
 		Memo:      input.Memo,
@@ -33,7 +27,7 @@ func toModel(input entity.UTNAEntityFood, id int64) utnaFoodSchema {
 	}
 }
 
-func toEntity(input utnaFoodSchema) entity.UTNAEntityFood {
+func toEntity(input utnaFood) entity.UTNAEntityFood {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 

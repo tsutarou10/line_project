@@ -16,7 +16,7 @@ import (
 	"github.com/tsutarou10/line_project/service/pkg/entity"
 	"github.com/tsutarou10/line_project/service/pkg/interactor"
 	"github.com/tsutarou10/line_project/service/pkg/presenter"
-	"github.com/tsutarou10/line_project/service/pkg/repository"
+	"github.com/tsutarou10/line_project/service/pkg/repository/dynamo"
 	"github.com/tsutarou10/line_project/service/pkg/utils"
 )
 
@@ -161,7 +161,7 @@ func setupAPIGatewayAdapter() (*controller.Controller, *presenter.Presenter) {
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
 	p := presenter.NewPresenter()
-	dynamo := repository.NewDynamo()
+	dynamo := dynamo.NewDynamo()
 	c := controller.NewController(
 		interactor.NewInputPort(
 			p,

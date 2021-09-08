@@ -1,41 +1,13 @@
-package repository
+package dynamo
 
 import (
 	"context"
 	"errors"
 	"log"
-	"os"
-	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/guregu/dynamo"
 	"github.com/tsutarou10/line_project/service/pkg/entity"
 	"github.com/tsutarou10/line_project/service/pkg/utils"
 )
-
-type Dynamo struct {
-	utnaFood       dynamo.Table
-	registerStatus dynamo.Table
-}
-
-func NewDynamo() *Dynamo {
-	log.Printf("[START] :%s", utils.GetFuncName())
-	defer log.Printf("[END] :%s", utils.GetFuncName())
-
-	db := dynamo.New(
-		session.New(),
-		aws.NewConfig().
-			WithRegion(os.Getenv("REGION")).
-			WithEndpoint(os.Getenv("DYNAMODB_ENDPOINT")),
-	)
-	utnaFood := db.Table(os.Getenv("UTNA_FOOD_TABLE_NAME"))
-	registerStatus := db.Table(os.Getenv("REGISTRATION_STATUS_TABLE_NAME"))
-	return &Dynamo{
-		utnaFood:       utnaFood,
-		registerStatus: registerStatus,
-	}
-}
 
 func (d *Dynamo) Put(ctx context.Context, input entity.UTNAEntityFood) error {
 	log.Printf("[START] :%s", utils.GetFuncName())
@@ -84,7 +56,7 @@ func (d *Dynamo) GetAll(ctx context.Context) ([]entity.UTNAEntityFood, error) {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
-	var resDynamo []utnaFoodSchema
+	var resDynamo []utnaFood
 	err := d.utnaFood.Scan().All(&resDynamo)
 	if err != nil {
 		return nil, err
@@ -102,7 +74,7 @@ func (d *Dynamo) Delete(ctx context.Context, id int64) (*entity.UTNAEntityFood, 
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
-	var oldValue utnaFoodSchema
+	var oldValue utnaFood
 	err := d.utnaFood.Delete("id", id).OldValue(&oldValue)
 	if err != nil {
 		return nil, err
@@ -111,34 +83,8 @@ func (d *Dynamo) Delete(ctx context.Context, id int64) (*entity.UTNAEntityFood, 
 	return &res, nil
 }
 
-func (d *Dynamo) getRegisterStatus(ctx context.Context) utnaFoodRegisterStatus {
-	var res utnaFoodRegisterStatus
-	err := d.registerStatus.Get("status", "registered").One(&res)
-	if err != nil {
-		return utnaFoodRegisterStatus{
-			Status:    "registered",
-			Number:    0,
-			UpdatedAt: time.Now().Unix(),
-		}
-	}
-	return res
-}
-
-func (d *Dynamo) putRegisterStatus(ctx context.Context, rn int64) error {
-	input := utnaFoodRegisterStatus{
-		Status:    "registered",
-		Number:    rn,
-		UpdatedAt: time.Now().Unix(),
-	}
-	if err := d.registerStatus.Put(input).Run(); err != nil {
-		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
-		return err
-	}
-	return nil
-}
-
-func (d *Dynamo) getWithURL(ctx context.Context, url string) (*utnaFoodSchema, error) {
-	var rsl utnaFoodSchema
+func (d *Dynamo) getWithURL(ctx context.Context, url string) (*utnaFood, error) {
+	var rsl utnaFood
 	if err := d.utnaFood.Get("url", url).Index("URLIndex").One(&rsl); err != nil {
 		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
 		return nil, err
