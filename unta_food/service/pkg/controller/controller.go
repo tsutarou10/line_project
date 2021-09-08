@@ -36,8 +36,8 @@ func (c *Controller) RegisterController(ctx context.Context, req events.APIGatew
 
 	wc := utils.ExtractWebhookContext(*webhook)
 	if wc == nil || len(wc.ReceivedMessages) == 0 {
-		log.Printf("[ERROR]: %s. sm: %s", utils.GetFuncName(), "error")
-		return errors.New("error")
+		log.Printf("[ERROR]: %s. sm: %s", utils.GetFuncName(), "invalid request")
+		return errors.New("invalid request")
 	}
 
 	if !isURL(wc.ReceivedMessages[0]) {
@@ -72,8 +72,8 @@ func (c *Controller) DeleteController(ctx context.Context, req events.APIGateway
 
 	wc := utils.ExtractWebhookContext(*webhook)
 	if wc == nil || len(wc.ReceivedMessages) <= 1 {
-		log.Printf("[ERROR]: %s. sm: %s", utils.GetFuncName(), "error")
-		return errors.New("error")
+		log.Printf("[ERROR]: %s. sm: %s", utils.GetFuncName(), "invalid request")
+		return errors.New("invalid request")
 	}
 
 	id, err := strconv.ParseInt(wc.ReceivedMessages[1], 10, 64)
@@ -84,6 +84,42 @@ func (c *Controller) DeleteController(ctx context.Context, req events.APIGateway
 
 	return c.in.HandleDelete(ctx, id)
 
+}
+
+func (c *Controller) UpdateController(ctx context.Context, req events.APIGatewayProxyRequest) error {
+	log.Printf("[START] :%s", utils.GetFuncName())
+	defer log.Printf("[END] :%s", utils.GetFuncName())
+
+	webhook, err := utils.ExtractWebhook(req)
+	if err != nil {
+		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
+		return err
+	}
+
+	wc := utils.ExtractWebhookContext(*webhook)
+	// update id url [memo]
+	if wc == nil || len(wc.ReceivedMessages) < 3 {
+		log.Printf("[ERROR]: %s. sm: %s", utils.GetFuncName(), "invalid request")
+		return errors.New("invalid request")
+	}
+
+	if !isURL(wc.ReceivedMessages[2]) {
+		log.Printf("[ERROR]: %s, %s is invalidate url", utils.GetFuncName(), wc.ReceivedMessages[0])
+		return errors.New("invalidate url")
+	}
+	id, err := strconv.ParseInt(wc.ReceivedMessages[1], 10, 64)
+	if err != nil {
+		log.Printf("[ERROR]: %s. sm: %s", utils.GetFuncName(), "invalid id")
+		return errors.New("invalid id")
+	}
+	input := entity.RegisterEntity{
+		ID:  id,
+		URL: wc.ReceivedMessages[2],
+	}
+	if len(wc.ReceivedMessages) > 2 {
+		input.Memo = wc.ReceivedMessages[3]
+	}
+	return c.in.HandleUpdate(ctx, input)
 }
 
 func isURL(s string) bool {
