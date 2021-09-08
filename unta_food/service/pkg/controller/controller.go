@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"net/url"
+	"strconv"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/tsutarou10/line_project/service/pkg/entity"
@@ -57,6 +58,32 @@ func (c *Controller) GetAllController(ctx context.Context, req events.APIGateway
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
 	return c.in.HandleGetAll(ctx)
+}
+
+func (c *Controller) DeleteController(ctx context.Context, req events.APIGatewayProxyRequest) error {
+	log.Printf("[START] :%s", utils.GetFuncName())
+	defer log.Printf("[END] :%s", utils.GetFuncName())
+
+	webhook, err := utils.ExtractWebhook(req)
+	if err != nil {
+		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
+		return err
+	}
+
+	wc := utils.ExtractWebhookContext(*webhook)
+	if wc == nil || len(wc.ReceivedMessages) <= 1 {
+		log.Printf("[ERROR]: %s. sm: %s", utils.GetFuncName(), "error")
+		return errors.New("error")
+	}
+
+	id, err := strconv.ParseInt(wc.ReceivedMessages[1], 10, 64)
+	if err != nil {
+		log.Printf("[ERROR]: %s. sm: %s", utils.GetFuncName(), "invalid id")
+		return errors.New("invalid id")
+	}
+
+	return c.in.HandleDelete(ctx, id)
+
 }
 
 func isURL(s string) bool {

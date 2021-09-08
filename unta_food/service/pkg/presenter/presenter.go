@@ -12,6 +12,7 @@ import (
 type Presenter struct {
 	registerCh chan interface{}
 	getAllCh   chan interface{}
+	deleteCh   chan interface{}
 }
 
 func NewPresenter() *Presenter {
@@ -19,6 +20,7 @@ func NewPresenter() *Presenter {
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
 	return &Presenter{
+		make(chan interface{}),
 		make(chan interface{}),
 		make(chan interface{}),
 	}
@@ -57,4 +59,20 @@ func (p *Presenter) WaitForGetAllCompleted(ctx context.Context) (interface{}, er
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
 	return <-p.getAllCh, nil
+}
+
+func (p *Presenter) EmitDelete(ctx context.Context, output entity.RegisterEntity) {
+	log.Printf("[START] :%s", utils.GetFuncName())
+	defer log.Printf("[END] :%s", utils.GetFuncName())
+
+	go func() {
+		p.deleteCh <- output
+	}()
+}
+
+func (p *Presenter) WaitForDeleteCompleted(ctx context.Context) (interface{}, error) {
+	log.Printf("[START] :%s", utils.GetFuncName())
+	defer log.Printf("[END] :%s", utils.GetFuncName())
+
+	return <-p.deleteCh, nil
 }
