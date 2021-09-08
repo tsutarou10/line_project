@@ -21,3 +21,12 @@ readonly REGISTRATION_STATUS_TABLE_NAME="UTNAFoodRegistrationStatus"
 readonly SERVICE_STACK_NAME="${SERVICE_NAME}-stack"
 readonly FUNCTION_NAME="${SERVICE_NAME}-Function"
 readonly API_NAME="${SERVICE_NAME}-API"
+
+# ==== ssm ====
+readonly SSM_LINE_BOT_CHANNEL_SECRET="/${SERVICE_NAME}/LINE_BOT_CHANNEL_SECRET"
+readonly SSM_LINE_BOT_CHANNEL_TOKEN="/${SERVICE_NAME}/LINE_BOT_CHANNEL_TOKEN"
+
+function getSSMValue() {
+	local value=$(aws --region ${REGION} ssm get-parameter --name ${1} --with-decryption --output text --query "Parameter.Value" 2>&1)
+	echo ${value}
+}

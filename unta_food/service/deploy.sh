@@ -9,6 +9,9 @@ source ${SCRIPT_DIR}/../config.sh
 readonly TEMPLATE_FILE="${SCRIPT_DIR}/template.yml"
 readonly PACKAGED_TEMPLATE_FILE="${SCRIPT_DIR}/packaged_template.yml"
 
+readonly LINE_BOT_CHANNEL_SECRET=$(getSSMValue ${SSM_LINE_BOT_CHANNEL_SECRET})
+readonly LINE_BOT_CHANNEL_TOKEN=$(getSSMValue ${SSM_LINE_BOT_CHANNEL_TOKEN})
+
 echo "START BUILD"
 make
 echo "END BUILD"
@@ -30,7 +33,9 @@ aws cloudformation deploy \
     UTNAFoodTableName=${UTNA_FOOD_TABLE_NAME} \
 		RegistrationStatusTableName=${REGISTRATION_STATUS_TABLE_NAME} \
     APIName=${API_NAME} \
-		DatabaseStackName=${DATABASE_STACK_NAME}
+		DatabaseStackName=${DATABASE_STACK_NAME} \
+		LINEBotChannelSecret=${LINE_BOT_CHANNEL_SECRET} \
+		LINEBotChannelToken=${LINE_BOT_CHANNEL_TOKEN}
 
 aws cloudformation describe-stacks \
   --region ${REGION} \
