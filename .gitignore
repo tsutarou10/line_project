@@ -1,0 +1,5 @@
+.DS_STORE
+
+*/**/package-lock.json
+*/**/packaged_template.yml
+*/**/node_modules
