@@ -13,10 +13,10 @@ import (
 )
 
 type Controller struct {
-	in usecase.InputPort
+	in usecase.UTNAFoodInputPort
 }
 
-func NewController(in usecase.InputPort) *Controller {
+func NewController(in usecase.UTNAFoodInputPort) *Controller {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 

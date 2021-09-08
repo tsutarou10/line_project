@@ -11,14 +11,14 @@ import (
 )
 
 type interactor struct {
-	out    usecase.OutputPort
+	out    usecase.UTNAFoodOutputPort
 	dynamo gateway.DynamoGateway
 }
 
 func NewInputPort(
-	out usecase.OutputPort,
+	out usecase.UTNAFoodOutputPort,
 	dynamo gateway.DynamoGateway,
-) usecase.InputPort {
+) usecase.UTNAFoodInputPort {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
