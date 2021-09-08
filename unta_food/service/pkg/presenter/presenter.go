@@ -3,6 +3,7 @@ package presenter
 import (
 	"context"
 	"log"
+	"sort"
 
 	"github.com/tsutarou10/line_project/service/pkg/entity"
 	"github.com/tsutarou10/line_project/service/pkg/utils"
@@ -44,6 +45,9 @@ func (p *Presenter) EmitGetAll(ctx context.Context, output []entity.RegisterEnti
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
 	go func() {
+		sort.Slice(output, func(i, j int) bool {
+			return output[i].ID < output[j].ID
+		})
 		p.getAllCh <- output
 	}()
 }
