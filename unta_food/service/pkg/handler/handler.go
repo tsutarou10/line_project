@@ -41,8 +41,9 @@ func NewHandler(ctx context.Context, request events.APIGatewayProxyRequest) (eve
 		return raiseHandlerError(500, err, request)
 	}
 
-	msg := convertReplyMessage(*mp, out)
-	utils.ReplyMessageUsingAPIGWRequest(request, msg)
+	if err = replyMessage(request, *mp, out); err != nil {
+		return newAPIGatewayProxyReseponse(500, err, request), nil
+	}
 	return newAPIGatewayProxyReseponse(200, nil, request), nil
 }
 
