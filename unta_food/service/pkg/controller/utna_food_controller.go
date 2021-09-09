@@ -121,7 +121,7 @@ func (c *Controller) UpdateController(ctx context.Context, req events.APIGateway
 		ID:  id,
 		URL: wc.ReceivedMessages[2],
 	}
-	if len(wc.ReceivedMessages) > 2 {
+	if len(wc.ReceivedMessages) > 3 {
 		input.Memo = wc.ReceivedMessages[3]
 	}
 	return c.in.HandleUpdate(ctx, input)
