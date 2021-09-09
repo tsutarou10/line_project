@@ -3,11 +3,13 @@ package utils
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/line/line-bot-sdk-go/linebot"
+	"github.com/tsutarou10/line_project/service/pkg/entity"
 )
 
 type Webhook struct {
@@ -88,4 +90,46 @@ func ReplyMessageUsingAPIGWRequest(req events.APIGatewayProxyRequest, msg string
 		return errors.New("error")
 	}
 	return nil
+}
+
+func ReplyCurousel(req events.APIGatewayProxyRequest, wc WebhookContext, src []entity.UTNAEntityFood) {
+	bot, _ := linebot.New(
+		os.Getenv("LINE_BOT_CHANNEL_SECRET"),
+		os.Getenv("LINE_BOT_CHANNEL_TOKEN"),
+	)
+
+	var ccList []*linebot.CarouselColumn
+	for _, s := range src {
+		cc := CreateCarouselColumn(s.Memo, s.URL, s.ID)
+		ccList = append(ccList, cc)
+	}
+	ct := CreateCarouselTemplate(ccList)
+	resp := linebot.NewTemplateMessage(
+		"this is a carousel template with imageAspectRatio",
+		ct,
+	)
+	b, err := bot.ReplyMessage(wc.ReplyToken, resp).Do()
+	log.Print(b)
+	log.Print(err)
+}
+
+func CreateCarouselTemplate(columns []*linebot.CarouselColumn) *linebot.CarouselTemplate {
+	return linebot.NewCarouselTemplate(columns...).WithImageOptions("rectangle", "cover")
+}
+
+func CreateCarouselColumn(memo, url string, id int64) *linebot.CarouselColumn {
+
+	description := fmt.Sprintf("%d", id)
+	if memo != "" {
+		description += fmt.Sprintf(" %s", memo)
+	} else {
+		description += fmt.Sprintf(" %s", url)
+	}
+	return linebot.NewCarouselColumn(
+		"",
+		"",
+		description,
+		linebot.NewURIAction("View detail", url),
+		linebot.NewPostbackAction("Delete", fmt.Sprintf("action=delete&id=%d", id), "", ""),
+	)
 }

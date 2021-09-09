@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/tsutarou10/line_project/service/pkg/entity"
@@ -42,21 +43,7 @@ func printHelp(ctx context.Context, req events.APIGatewayProxyRequest) (interfac
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
-	wh, err := utils.ExtractWebhook(req)
-	if err != nil {
-		raiseHandlerError(500, err, req)
-	}
-	wc := utils.ExtractWebhookContext(*wh)
-	msg := `・get: 登録された飲食店の URL とメモを取得できます。
-		表示例 => id: URL | メモ
-
-・URL メモ: 飲食店の URL とそのメモを登録できます。（メモは任意)
-
-・update id url メモ: id で登録されている飲食店の情報を更新できます。id は get コマンドで確認できます。(メモは任意)
-
-・delete id: 該当する id の飲食店を削除します。id は get コマンドで確認できます。
-`
-	return nil, utils.ReplyMessage(*wc, msg)
+	return nil, nil
 }
 
 func getAllHandler(ctx context.Context, req events.APIGatewayProxyRequest) (interface{}, error) {
@@ -95,7 +82,7 @@ func createMethodPackage(req events.APIGatewayProxyRequest) (*methodPackage, err
 	}
 	wc := utils.ExtractWebhookContext(*wh)
 	var mp methodPackage
-	switch wc.ReceivedMessages[0] {
+	switch strings.ToLower(wc.ReceivedMessages[0]) {
 	case "get":
 		mp.Foc = getAllHandler
 		mp.Method = "get"
@@ -115,42 +102,56 @@ func createMethodPackage(req events.APIGatewayProxyRequest) (*methodPackage, err
 	return &mp, nil
 }
 
-func convertReplyMessage(mp methodPackage, src interface{}) string {
-	res := ""
+func replyMessage(req events.APIGatewayProxyRequest, mp methodPackage, src interface{}) error {
+	msg := ""
 	switch s := src.(type) {
 	case []entity.UTNAEntityFood:
-		for _, element := range s {
-			if element.Memo != "" {
-				res += fmt.Sprintf("・ %d: %s | %s\n", element.ID, element.URL, element.Memo)
-			} else {
-				res += fmt.Sprintf("・ %d: %s\n", element.ID, element.URL)
-			}
+		wh, err := utils.ExtractWebhook(req)
+		if err != nil {
+			raiseHandlerError(500, err, req)
 		}
+		wc := utils.ExtractWebhookContext(*wh)
+		utils.ReplyCurousel(req, *wc, s)
 	case entity.UTNAEntityFood:
 		switch mp.Method {
 		case "delete":
 			if s.Memo != "" {
-				res = fmt.Sprintf("deleted %s | %s", s.URL, s.Memo)
+				msg = fmt.Sprintf("deleted %s | %s", s.URL, s.Memo)
 			} else {
-				res = fmt.Sprintf("deleted %s", s.URL)
+				msg = fmt.Sprintf("deleted %s", s.URL)
 			}
 		case "update":
 			if s.Memo != "" {
-				res = fmt.Sprintf("updated %s | %s", s.URL, s.Memo)
+				msg = fmt.Sprintf("updated %s | %s", s.URL, s.Memo)
 			} else {
-				res = fmt.Sprintf("updated %s", s.URL)
+				msg = fmt.Sprintf("updated %s", s.URL)
 			}
 		case "register":
 			if s.Memo != "" {
-				res = fmt.Sprintf("registered %s | %s", s.URL, s.Memo)
+				msg = fmt.Sprintf("registered %s | %s", s.URL, s.Memo)
 			} else {
-				res = fmt.Sprintf("registered %s", s.URL)
+				msg = fmt.Sprintf("registered %s", s.URL)
 			}
 		default:
-			res = s.URL
+			msg = s.URL
 		}
+		utils.ReplyMessageUsingAPIGWRequest(req, msg)
 	default:
-		res = "success"
+		switch mp.Method {
+		case "help":
+			msg = `・get: 登録された飲食店の URL とメモを取得できます。
+表示例 => id: URL | メモ
+
+・URL メモ: 飲食店の URL とそのメモを登録できます。（メモは任意)
+
+・update id url メモ: id で登録されている飲食店の情報を更新できます。id は get コマンドで確認できます。(メモは任意)
+
+・delete id: 該当する id の飲食店を削除します。id は get コマンドで確認できます。
+		`
+		default:
+			msg = "success"
+		}
+		utils.ReplyMessageUsingAPIGWRequest(req, msg)
 	}
-	return res
+	return nil
 }
