@@ -11,7 +11,7 @@ import (
 	"github.com/tsutarou10/line_project/service/pkg/utils"
 )
 
-func updateHandler(ctx context.Context, req events.APIGatewayProxyRequest) (interface{}, error) {
+func updateHandlerOfMessage(ctx context.Context, req events.APIGatewayProxyRequest) (interface{}, error) {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
@@ -25,7 +25,7 @@ func updateHandler(ctx context.Context, req events.APIGatewayProxyRequest) (inte
 	return p.WaitForUpdateCompleted(ctx)
 }
 
-func registerHandler(ctx context.Context, req events.APIGatewayProxyRequest) (interface{}, error) {
+func registerHandlerOfMessage(ctx context.Context, req events.APIGatewayProxyRequest) (interface{}, error) {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
@@ -39,14 +39,14 @@ func registerHandler(ctx context.Context, req events.APIGatewayProxyRequest) (in
 	return p.WaitForRegisterCompleted(ctx)
 }
 
-func printHelp(ctx context.Context, req events.APIGatewayProxyRequest) (interface{}, error) {
+func printHelpOfMessage(ctx context.Context, req events.APIGatewayProxyRequest) (interface{}, error) {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
 	return nil, nil
 }
 
-func getAllHandler(ctx context.Context, req events.APIGatewayProxyRequest) (interface{}, error) {
+func getAllHandlerOfMessage(ctx context.Context, req events.APIGatewayProxyRequest) (interface{}, error) {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
@@ -60,7 +60,7 @@ func getAllHandler(ctx context.Context, req events.APIGatewayProxyRequest) (inte
 	return p.WaitForGetAllCompleted(ctx)
 }
 
-func deleteHandler(ctx context.Context, req events.APIGatewayProxyRequest) (interface{}, error) {
+func deleteHandlerOfMessage(ctx context.Context, req events.APIGatewayProxyRequest) (interface{}, error) {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
@@ -74,7 +74,7 @@ func deleteHandler(ctx context.Context, req events.APIGatewayProxyRequest) (inte
 	return p.WaitForDeleteCompleted(ctx)
 }
 
-func createMethodPackage(req events.APIGatewayProxyRequest) (*methodPackage, error) {
+func createMethodPackageOfMessage(req events.APIGatewayProxyRequest) (*methodPackage, error) {
 	wh, err := utils.ExtractWebhook(req)
 	if err != nil {
 		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
@@ -84,19 +84,19 @@ func createMethodPackage(req events.APIGatewayProxyRequest) (*methodPackage, err
 	var mp methodPackage
 	switch strings.ToLower(wc.ReceivedMessages[0]) {
 	case "get":
-		mp.Foc = getAllHandler
+		mp.Foc = getAllHandlerOfMessage
 		mp.Method = "get"
 	case "delete":
-		mp.Foc = deleteHandler
+		mp.Foc = deleteHandlerOfMessage
 		mp.Method = "delete"
 	case "update":
-		mp.Foc = updateHandler
+		mp.Foc = updateHandlerOfMessage
 		mp.Method = "update"
 	case "help", "ヘルプ":
-		mp.Foc = printHelp
+		mp.Foc = printHelpOfMessage
 		mp.Method = "help"
 	default:
-		mp.Foc = registerHandler
+		mp.Foc = registerHandlerOfMessage
 		mp.Method = "register"
 	}
 	return &mp, nil

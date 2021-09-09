@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/line/line-bot-sdk-go/linebot"
@@ -18,8 +19,9 @@ type Webhook struct {
 }
 
 type WebhookContext struct {
-	ReceivedMessages []string
-	ReplyToken       string
+	ReceivedMessages     []string
+	ReceivedPostBackData map[string]string
+	ReplyToken           string
 }
 
 func ExtractWebhookContext(wh Webhook) *WebhookContext {
@@ -36,6 +38,18 @@ func ExtractWebhookContext(wh Webhook) *WebhookContext {
 					ReceivedMessages: texts,
 					ReplyToken:       event.ReplyToken,
 				}
+			}
+		case linebot.EventTypePostback:
+			// e.g. "action=buy&itemid=111"
+			datas := strings.Split(event.Postback.Data, "&")
+			rpbd := map[string]string{}
+			for _, data := range datas {
+				tmp := strings.Split(data, "=")
+				rpbd[tmp[0]] = tmp[1]
+			}
+			return &WebhookContext{
+				ReceivedPostBackData: rpbd,
+				ReplyToken:           event.ReplyToken,
 			}
 		}
 	}
