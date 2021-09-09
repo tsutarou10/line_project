@@ -147,3 +147,39 @@ func CreateCarouselColumn(memo, url string, id int64) *linebot.CarouselColumn {
 		linebot.NewPostbackAction("Delete", fmt.Sprintf("action=delete&id=%d", id), "", ""),
 	)
 }
+
+func CreateQuickResponse(msg, url, buttonMsg string) linebot.SendingMessage {
+	resp := linebot.NewTextMessage(
+		msg,
+	).WithQuickReplies(
+		linebot.NewQuickReplyItems(
+			linebot.NewQuickReplyButton(
+				"",
+				linebot.NewURIAction(buttonMsg, url),
+			),
+		),
+	)
+	return resp
+}
+
+func ReplyMessageWithQuickResponse(req events.APIGatewayProxyRequest, msg, url, buttonMsg string) error {
+	log.Printf("[START] :%s", GetFuncName())
+	defer log.Printf("[END] :%s", GetFuncName())
+	wh, err := ExtractWebhook(req)
+	if err != nil {
+		log.Printf("[ERROR]: %s, %s", GetFuncName(), err.Error())
+		return err
+	}
+	wc := ExtractWebhookContext(*wh)
+	if wc == nil {
+		log.Printf("[ERROR]: %s, %s", GetFuncName(), "error")
+		return errors.New("error")
+	}
+	qr := CreateQuickResponse(msg, url, buttonMsg)
+	bot, _ := linebot.New(
+		os.Getenv("LINE_BOT_CHANNEL_SECRET"),
+		os.Getenv("LINE_BOT_CHANNEL_TOKEN"),
+	)
+	_, err = bot.ReplyMessage(wc.ReplyToken, qr).Do()
+	return err
+}

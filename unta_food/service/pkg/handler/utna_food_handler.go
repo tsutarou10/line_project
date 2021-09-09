@@ -147,13 +147,13 @@ func replyMessage(req events.APIGatewayProxyRequest, mp methodPackage, src inter
 ・update id url メモ: id で登録されている飲食店の情報を更新できます。id は get コマンドで確認できます。(メモは任意)
 
 ・delete id: 該当する id の飲食店を削除します。id は get コマンドで確認できます。
-
-・詳細はこちら -> https://github.com/tsutarou10/line_project/blob/main/unta_food/README.md
 		`
+			readmeURL := "https://github.com/tsutarou10/line_project/blob/main/unta_food/README.md"
+			utils.ReplyMessageWithQuickResponse(req, msg, readmeURL, "使い方の詳細")
 		default:
 			msg = "success"
+			utils.ReplyMessageUsingAPIGWRequest(req, msg)
 		}
-		utils.ReplyMessageUsingAPIGWRequest(req, msg)
 	}
 	return nil
 }
