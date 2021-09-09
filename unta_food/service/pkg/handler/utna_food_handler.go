@@ -140,13 +140,15 @@ func replyMessage(req events.APIGatewayProxyRequest, mp methodPackage, src inter
 		switch mp.Method {
 		case "help":
 			msg = `・get: 登録された飲食店の URL とメモを取得できます。
-表示例 => id: URL | メモ
+	表示例 => id: URL | メモ
 
 ・URL メモ: 飲食店の URL とそのメモを登録できます。（メモは任意)
 
 ・update id url メモ: id で登録されている飲食店の情報を更新できます。id は get コマンドで確認できます。(メモは任意)
 
 ・delete id: 該当する id の飲食店を削除します。id は get コマンドで確認できます。
+
+・詳細はこちら -> https://github.com/tsutarou10/line_project/blob/main/unta_food/README.md
 		`
 		default:
 			msg = "success"
