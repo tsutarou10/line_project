@@ -47,6 +47,23 @@ func NewHandler(ctx context.Context, request events.APIGatewayProxyRequest) (eve
 	return newAPIGatewayProxyReseponse(200, nil, request), nil
 }
 
+func createMethodPackage(req events.APIGatewayProxyRequest) (*methodPackage, error) {
+	wh, err := utils.ExtractWebhook(req)
+	if err != nil {
+		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
+		return nil, err
+	}
+	wc := utils.ExtractWebhookContext(*wh)
+	if len(wc.ReceivedMessages) != 0 {
+		return createMethodPackageOfMessage(req)
+	} else if len(wc.ReceivedPostBackData) != 0 {
+		return createMethodPackageOfPostback(req)
+	}
+	errMsg := "invalid method"
+	log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), errMsg)
+	return nil, errors.New(errMsg)
+}
+
 func newAPIGatewayProxyReseponse(statusCode int, err error, request events.APIGatewayProxyRequest) events.APIGatewayProxyResponse {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
