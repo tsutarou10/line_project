@@ -49,7 +49,14 @@ func (c *Controller) RegisterController(ctx context.Context, req events.APIGatew
 		URL: wc.ReceivedMessages[0],
 	}
 	if len(wc.ReceivedMessages) > 1 {
-		input.Memo = wc.ReceivedMessages[1]
+		memo := ""
+		for i, rm := range wc.ReceivedMessages[1:] {
+			memo += rm
+			if i != len(wc.ReceivedMessages)-1 {
+				memo += " "
+			}
+		}
+		input.Memo = memo
 	}
 	return c.in.HandleRegister(ctx, input)
 }
@@ -122,7 +129,14 @@ func (c *Controller) UpdateController(ctx context.Context, req events.APIGateway
 		URL: wc.ReceivedMessages[2],
 	}
 	if len(wc.ReceivedMessages) > 3 {
-		input.Memo = wc.ReceivedMessages[3]
+		memo := ""
+		for i, rm := range wc.ReceivedMessages[3:] {
+			memo += rm
+			if i != len(wc.ReceivedMessages)-1 {
+				memo += " "
+			}
+		}
+		input.Memo = memo
 	}
 	return c.in.HandleUpdate(ctx, input)
 }
