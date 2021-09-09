@@ -140,7 +140,6 @@ func replyMessage(req events.APIGatewayProxyRequest, mp methodPackage, src inter
 		switch mp.Method {
 		case "help":
 			msg = `・get: 登録された飲食店の URL とメモを取得できます。
-	表示例 => id: URL | メモ
 
 ・URL メモ: 飲食店の URL とそのメモを登録できます。（メモは任意)
 
