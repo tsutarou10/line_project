@@ -33,7 +33,7 @@ func replyMessageOfMessage(req events.APIGatewayProxyRequest, mp methodPackage, 
 		}
 		wc := utils.ExtractWebhookContext(*wh)
 		if len(s) != 0 {
-			utils.ReplyCurousel(req, *wc, s)
+			utils.ReplyCurousel(req, *wc, s, mp.Method)
 			return nil
 		}
 		msg = "Not found"
@@ -73,14 +73,14 @@ func replyMessageOfMessage(req events.APIGatewayProxyRequest, mp methodPackage, 
 func replyMessageOfPostback(req events.APIGatewayProxyRequest, mp methodPackage, src interface{}) error {
 	msg := ""
 	switch mp.Method {
-	case "get", "handler":
+	case "get", "history":
 		s := src.([]entity.UTNAEntityFood)
 		wh, err := utils.ExtractWebhook(req)
 		if err != nil {
 			raiseHandlerError(500, err, req)
 		}
 		wc := utils.ExtractWebhookContext(*wh)
-		utils.ReplyCurousel(req, *wc, s)
+		utils.ReplyCurousel(req, *wc, s, mp.Method)
 		return nil
 	case "update":
 		s := src.(entity.UTNAEntityFood)
