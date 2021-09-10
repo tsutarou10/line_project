@@ -28,6 +28,12 @@ func createMethodPackageOfPostback(req events.APIGatewayProxyRequest) (*methodPa
 	case "visit":
 		mp.Foc = visitHandlerOfPostback
 		mp.Method = "visit"
+	case "update":
+		mp.Foc = updateHandlerOfPostback
+		mp.Method = "update"
+	case "history":
+		mp.Foc = getVisitedRestaurantOfPostback
+		mp.Method = "history"
 	}
 	return &mp, nil
 }
@@ -69,4 +75,30 @@ func visitHandlerOfPostback(ctx context.Context, req events.APIGatewayProxyReque
 		return nil, err
 	}
 	return p.WaitForVisitCompleted(ctx)
+}
+
+func updateHandlerOfPostback(ctx context.Context, req events.APIGatewayProxyRequest) (interface{}, error) {
+	log.Printf("[START] :%s", utils.GetFuncName())
+	defer log.Printf("[END] :%s", utils.GetFuncName())
+
+	c, p := setupAPIGatewayAdapter()
+	log.Printf("%s, %s", utils.GetFuncName(), req.Body)
+	if err := c.UpdateControllerOfPostback(ctx, req); err != nil {
+		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
+		return nil, err
+	}
+	return p.WaitForUpdateCompleted(ctx)
+}
+
+func getVisitedRestaurantOfPostback(ctx context.Context, req events.APIGatewayProxyRequest) (interface{}, error) {
+	log.Printf("[START] :%s", utils.GetFuncName())
+	defer log.Printf("[END] :%s", utils.GetFuncName())
+
+	c, p := setupAPIGatewayAdapter()
+	log.Printf("%s, %s", utils.GetFuncName(), req.Body)
+	if err := c.GetVisitedRestaurantController(ctx, req); err != nil {
+		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
+		return nil, err
+	}
+	return p.WaitForGetVisitedRestaurantCompleted(ctx)
 }

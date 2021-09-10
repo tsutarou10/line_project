@@ -29,7 +29,7 @@
 	```
 * We can access link by putting "View detail" button.
 
-![Get screen](https://user-images.githubusercontent.com/28858993/132785900-f7e93332-b96d-48ec-95a7-94fcad19e6a1.jpg)
+![Get screen](https://user-images.githubusercontent.com/28858993/132916956-b4a4db87-2fcd-40c8-834c-6e9dc014dd2b.jpg)
 
 ### 3. Update restaurant link and memo
 
@@ -43,7 +43,7 @@
 	```
 	* We can check restaurant id by sending get command.
 
-![Update screen](https://user-images.githubusercontent.com/28858993/132770738-1f17054d-c1da-458b-964c-e995ff1a7e03.jpg)
+![Update screen](https://user-images.githubusercontent.com/28858993/132916882-c59e76f5-63bd-4035-936a-9e5881ea21f9.jpg)
 
 ### 4. Delete restaurant link
 
@@ -65,3 +65,27 @@
 	2. We can delete restaurant that we want to delete by putting delete button of carousel.
 
 ![Delete screen2](https://user-images.githubusercontent.com/28858993/132786654-08255280-9d59-4cc4-abf3-6fa7beec3bc9.jpg)
+
+### 5. Register visit hisotry
+
+* We can register visit history.
+
+#### How to register visit history?
+
+1. Send `get` command. Then LINE Bot returns carousel of restaurant list.
+2. Tap `Went` button.
+
+###6. Get visit hisotry
+
+* We can get visit history.
+
+#### How to get visit history
+
+* We can get it by using `history` command.
+		```
+		history
+		```
+
+![History screen](https://user-images.githubusercontent.com/28858993/132917626-6e98c624-ce7e-44d7-a804-3da4ad74213d.jpg)
+
+

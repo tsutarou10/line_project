@@ -110,7 +110,7 @@ func ReplyMessageUsingAPIGWRequest(req events.APIGatewayProxyRequest, msg string
 	return nil
 }
 
-func ReplyCurousel(req events.APIGatewayProxyRequest, wc WebhookContext, src []entity.UTNAEntityFood) {
+func ReplyCurousel(req events.APIGatewayProxyRequest, wc WebhookContext, src []entity.UTNAEntityFood, methodType string) {
 	bot, _ := linebot.New(
 		os.Getenv("LINE_BOT_CHANNEL_SECRET"),
 		os.Getenv("LINE_BOT_CHANNEL_TOKEN"),
@@ -118,7 +118,7 @@ func ReplyCurousel(req events.APIGatewayProxyRequest, wc WebhookContext, src []e
 
 	var ccList []*linebot.CarouselColumn
 	for _, s := range src {
-		cc := CreateCarouselColumn(s.Title, s.Memo, s.URL, s.ImageURL)
+		cc := CreateCarouselColumn(s.Title, s.Memo, s.URL, s.ImageURL, methodType)
 		ccList = append(ccList, cc)
 	}
 	ct := CreateCarouselTemplate(ccList)
@@ -135,7 +135,12 @@ func CreateCarouselTemplate(columns []*linebot.CarouselColumn) *linebot.Carousel
 	return linebot.NewCarouselTemplate(columns...).WithImageOptions("rectangle", "cover")
 }
 
-func CreateCarouselColumn(title, memo, url, imageURL string) *linebot.CarouselColumn {
+type postbackActionElement struct {
+	text string
+	body string
+}
+
+func CreateCarouselColumn(title, memo, url, imageURL, methodType string) *linebot.CarouselColumn {
 	if len(title) == 0 {
 		title = "Empty title"
 	}
@@ -150,13 +155,39 @@ func CreateCarouselColumn(title, memo, url, imageURL string) *linebot.CarouselCo
 	if description == "" {
 		description += "Empty memo"
 	}
+	postbackActionMap := map[string]postbackActionElement{
+		"get": postbackActionElement{
+			text: "Went",
+			body: fmt.Sprintf("action=visit&url=%s", url),
+		},
+		"history": postbackActionElement{
+			text: "Want to go again",
+			body: fmt.Sprintf("action=update&url=%s&memo=%s", url, memo),
+		},
+	}
+	// FIXIME: issue#14 でリファクタリング
+	if methodType == "get" {
+		return linebot.NewCarouselColumn(
+			imageURL,
+			title,
+			description,
+			linebot.NewURIAction("View detail", url),
+			linebot.NewPostbackAction(
+				postbackActionMap[methodType].text,
+				postbackActionMap[methodType].body,
+				"", ""),
+			linebot.NewPostbackAction("Delete", fmt.Sprintf("action=delete&url=%s", url), "", ""),
+		)
+	}
 	return linebot.NewCarouselColumn(
 		imageURL,
 		title,
 		description,
 		linebot.NewURIAction("View detail", url),
-		linebot.NewPostbackAction("Went", fmt.Sprintf("action=visit&url=%s", url), "", ""),
-		linebot.NewPostbackAction("Delete", fmt.Sprintf("action=delete&url=%s", url), "", ""),
+		linebot.NewPostbackAction(
+			postbackActionMap[methodType].text,
+			postbackActionMap[methodType].body,
+			"", ""),
 	)
 }
 
@@ -168,6 +199,10 @@ func CreateQuickResponse(msg, url, buttonMsg string) linebot.SendingMessage {
 			linebot.NewQuickReplyButton(
 				"",
 				linebot.NewPostbackAction("登録情報を取得", "action=get", "", ""),
+			),
+			linebot.NewQuickReplyButton(
+				"",
+				linebot.NewPostbackAction("行ったことのある店を取得", "action=history", "", ""),
 			),
 			linebot.NewQuickReplyButton(
 				"",
