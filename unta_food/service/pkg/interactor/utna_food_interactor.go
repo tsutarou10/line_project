@@ -12,6 +12,10 @@ func (i *interactor) HandleRegister(ctx context.Context, input entity.UTNAEntity
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
+	ogpTag := i.ogp.FetchOGPTag(input.URL)
+	input.Title = ogpTag.Title
+	input.ImageURL = ogpTag.ImageURL
+
 	if err := i.dynamo.Put(ctx, input); err != nil {
 		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
 		return err
@@ -50,6 +54,10 @@ func (i *interactor) HandleDelete(ctx context.Context, url string) error {
 func (i *interactor) HandleUpdate(ctx context.Context, src entity.UTNAEntityFood) error {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
+
+	ogpTag := i.ogp.FetchOGPTag(src.URL)
+	src.Title = ogpTag.Title
+	src.ImageURL = ogpTag.ImageURL
 
 	if err := i.dynamo.Update(ctx, src); err != nil {
 		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())

@@ -16,6 +16,7 @@ import (
 	"github.com/tsutarou10/line_project/service/pkg/interactor"
 	"github.com/tsutarou10/line_project/service/pkg/presenter"
 	"github.com/tsutarou10/line_project/service/pkg/repository/dynamo"
+	"github.com/tsutarou10/line_project/service/pkg/repository/opengraph"
 	"github.com/tsutarou10/line_project/service/pkg/utils"
 )
 
@@ -96,10 +97,12 @@ func setupAPIGatewayAdapter() (*controller.Controller, *presenter.Presenter) {
 
 	p := presenter.NewPresenter()
 	dynamo := dynamo.NewDynamo()
+	ogp := opengraph.NewOpenGraph()
 	c := controller.NewController(
 		interactor.NewInputPort(
 			p,
 			dynamo,
+			ogp,
 		))
 	return c, p
 }
