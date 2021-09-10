@@ -51,7 +51,7 @@ func (p *Presenter) EmitGetAll(ctx context.Context, output []entity.UTNAEntityFo
 	go func() {
 		var res []entity.UTNAEntityFood
 		for _, o := range output {
-			if !o.IsCompleted {
+			if !o.Hidden {
 				res = append(res, o)
 			}
 		}

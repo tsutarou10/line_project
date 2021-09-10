@@ -9,14 +9,16 @@ import (
 )
 
 type interactor struct {
-	out    usecase.UTNAFoodOutputPort
-	dynamo gateway.UTNAFoodDynamoGateway
-	ogp    gateway.OpenGraphGateway
+	out      usecase.UTNAFoodOutputPort
+	utnaFood gateway.UTNAFoodDynamoGateway
+	visited  gateway.VisitedRestaurantGateway
+	ogp      gateway.OpenGraphGateway
 }
 
 func NewInputPort(
 	out usecase.UTNAFoodOutputPort,
-	dynamo gateway.UTNAFoodDynamoGateway,
+	utnaFood gateway.UTNAFoodDynamoGateway,
+	visited gateway.VisitedRestaurantGateway,
 	ogp gateway.OpenGraphGateway,
 ) usecase.UTNAFoodInputPort {
 	log.Printf("[START] :%s", utils.GetFuncName())
@@ -24,7 +26,8 @@ func NewInputPort(
 
 	return &interactor{
 		out,
-		dynamo,
+		utnaFood,
+		visited,
 		ogp,
 	}
 }

@@ -81,22 +81,22 @@ func (c *Controller) UpdateController(ctx context.Context, req events.APIGateway
 	}
 
 	wc := utils.ExtractWebhookContext(*webhook)
-	// update id url [memo]
-	if wc == nil || len(wc.ReceivedMessages) < 3 {
+	// update url [memo]
+	if wc == nil || len(wc.ReceivedMessages) < 2 {
 		msg := "invalid request"
 		log.Printf("[ERROR]: %s. error: %s", utils.GetFuncName(), msg)
 		return errors.New(msg)
 	}
 
-	if !utils.IsURL(wc.ReceivedMessages[2]) {
+	if !utils.IsURL(wc.ReceivedMessages[1]) {
 		msg := "invalid url"
 		log.Printf("[ERROR]: %s, %s is %s", utils.GetFuncName(), wc.ReceivedMessages[0], msg)
 		return errors.New(msg)
 	}
 	input := entity.UTNAEntityFood{
-		URL: wc.ReceivedMessages[2],
+		URL: wc.ReceivedMessages[1],
 	}
-	if len(wc.ReceivedMessages) > 3 {
+	if len(wc.ReceivedMessages) > 2 {
 		input.Memo = createMemo(wc.ReceivedMessages[3:])
 	}
 	return c.in.HandleUpdate(ctx, input)

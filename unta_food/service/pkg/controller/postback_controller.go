@@ -49,7 +49,7 @@ func (c *Controller) GetControllerOfPostback(ctx context.Context, req events.API
 	return c.in.HandleGetAll(ctx)
 }
 
-func (c *Controller) CompleteControllerOfPostback(ctx context.Context, req events.APIGatewayProxyRequest) error {
+func (c *Controller) VisitControllerOfPostback(ctx context.Context, req events.APIGatewayProxyRequest) error {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
@@ -66,5 +66,5 @@ func (c *Controller) CompleteControllerOfPostback(ctx context.Context, req event
 		return errors.New(msg)
 	}
 
-	return c.in.HandleComplete(ctx, wc.ReceivedPostBackData["url"])
+	return c.in.HandleVisit(ctx, wc.ReceivedPostBackData["url"])
 }

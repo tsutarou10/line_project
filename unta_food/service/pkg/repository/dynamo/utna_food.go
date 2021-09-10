@@ -18,7 +18,7 @@ type UTNAFoodDynamo struct {
 	utnaFood dynamo.Table
 }
 
-func NewDynamo() *UTNAFoodDynamo {
+func NewUTNAFoodDynamo() *UTNAFoodDynamo {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
@@ -40,13 +40,14 @@ func (d *UTNAFoodDynamo) Put(ctx context.Context, input entity.UTNAEntityFood) e
 
 	tmp, _ := d.getWithURL(ctx, input.URL)
 	if tmp != nil {
-		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), "already registered")
-		return errors.New("already registered")
+		errMsg := "既に登録されています。情報更新する場合は update コマンドを用いてください。"
+		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), errMsg)
+		return errors.New(errMsg)
 	}
 
 	input.UpdatedAt = time.Now().Unix()
 
-	if err := d.utnaFood.Put(toModel(input)).Run(); err != nil {
+	if err := d.utnaFood.Put(toModelOfUTNAFood(input)).Run(); err != nil {
 		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
 		return err
 	}
@@ -57,7 +58,7 @@ func (d *UTNAFoodDynamo) Update(ctx context.Context, input entity.UTNAEntityFood
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
-	if err := d.utnaFood.Put(toModel(input)).Run(); err != nil {
+	if err := d.utnaFood.Put(toModelOfUTNAFood(input)).Run(); err != nil {
 		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
 		return err
 	}
@@ -76,7 +77,7 @@ func (d *UTNAFoodDynamo) GetAll(ctx context.Context) ([]entity.UTNAEntityFood, e
 
 	var rsl []entity.UTNAEntityFood
 	for _, r := range resDynamo {
-		rsl = append(rsl, toEntity(r))
+		rsl = append(rsl, toEntityOfUTNAFood(r))
 	}
 
 	return rsl, nil
@@ -91,7 +92,7 @@ func (d *UTNAFoodDynamo) Delete(ctx context.Context, url string) (*entity.UTNAEn
 	if err != nil {
 		return nil, err
 	}
-	res := toEntity(oldValue)
+	res := toEntityOfUTNAFood(oldValue)
 	return &res, nil
 }
 
@@ -102,24 +103,4 @@ func (d *UTNAFoodDynamo) getWithURL(ctx context.Context, url string) (*utnaFood,
 		return nil, err
 	}
 	return &rsl, nil
-}
-
-func (d *UTNAFoodDynamo) PutCompleted(ctx context.Context, ogpTag entity.OGPTag) error {
-	log.Printf("[START] :%s", utils.GetFuncName())
-	defer log.Printf("[END] :%s", utils.GetFuncName())
-
-	input := entity.UTNAEntityFood{
-		URL:         ogpTag.URL,
-		Title:       ogpTag.Title,
-		ImageURL:    ogpTag.ImageURL,
-		IsCompleted: true,
-		UpdatedAt:   time.Now().Unix(),
-	}
-
-	if err := d.utnaFood.Put(toModel(input)).Run(); err != nil {
-		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
-		return err
-	}
-	return nil
-
 }

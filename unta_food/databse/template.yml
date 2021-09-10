@@ -4,6 +4,8 @@ Description: UTNA food database stack
 Parameters:
   UTNAFoodTableName:
     Type: String
+  VisitedRestaurantTableName:
+    Type: String
 
 Resources:
   UTNAFoodTable:
@@ -23,8 +25,29 @@ Resources:
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
 
+  VisitedRestaurantTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    Properties:
+      TableName: !Ref VisitedRestaurantTableName
+      SSESpecification:
+        SSEEnabled: false
+      AttributeDefinitions:
+        - AttributeName: url
+          AttributeType: S
+      KeySchema:
+        - AttributeName: url
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
 Outputs:
   UTNAFoodTableName:
     Value: !Ref UTNAFoodTable
     Export:
       Name: !Sub "${AWS::StackName}-UTNAFoodTableName"
+  VisitedRestaurantTableName:
+    Value: !Ref VisitedRestaurantTable
+    Export:
+      Name: !Sub "${AWS::StackName}-VisitedRestaurantTableName"
