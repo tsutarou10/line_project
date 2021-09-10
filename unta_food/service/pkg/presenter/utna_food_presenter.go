@@ -48,7 +48,7 @@ func (p *Presenter) EmitGetAll(ctx context.Context, output []entity.UTNAEntityFo
 
 	go func() {
 		sort.Slice(output, func(i, j int) bool {
-			return output[i].ID < output[j].ID
+			return output[i].UpdatedAt < output[j].UpdatedAt
 		})
 		p.getAllCh <- output
 	}()

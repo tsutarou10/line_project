@@ -11,8 +11,7 @@ import (
 )
 
 type Dynamo struct {
-	utnaFood       dynamo.Table
-	registerStatus dynamo.Table
+	utnaFood dynamo.Table
 }
 
 func NewDynamo() *Dynamo {
@@ -26,9 +25,7 @@ func NewDynamo() *Dynamo {
 			WithEndpoint(os.Getenv("DYNAMODB_ENDPOINT")),
 	)
 	utnaFood := db.Table(os.Getenv("UTNA_FOOD_TABLE_NAME"))
-	registerStatus := db.Table(os.Getenv("REGISTRATION_STATUS_TABLE_NAME"))
 	return &Dynamo{
-		utnaFood:       utnaFood,
-		registerStatus: registerStatus,
+		utnaFood: utnaFood,
 	}
 }

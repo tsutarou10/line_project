@@ -118,7 +118,7 @@ func ReplyCurousel(req events.APIGatewayProxyRequest, wc WebhookContext, src []e
 
 	var ccList []*linebot.CarouselColumn
 	for _, s := range src {
-		cc := CreateCarouselColumn(s.Title, s.Memo, s.URL, s.ImageURL, s.ID)
+		cc := CreateCarouselColumn(s.Title, s.Memo, s.URL, s.ImageURL)
 		ccList = append(ccList, cc)
 	}
 	ct := CreateCarouselTemplate(ccList)
@@ -135,7 +135,7 @@ func CreateCarouselTemplate(columns []*linebot.CarouselColumn) *linebot.Carousel
 	return linebot.NewCarouselTemplate(columns...).WithImageOptions("rectangle", "cover")
 }
 
-func CreateCarouselColumn(title, memo, url, imageURL string, id int64) *linebot.CarouselColumn {
+func CreateCarouselColumn(title, memo, url, imageURL string) *linebot.CarouselColumn {
 	if len(title) == 0 {
 		title = "Empty title"
 	}
@@ -146,16 +146,16 @@ func CreateCarouselColumn(title, memo, url, imageURL string, id int64) *linebot.
 		imageURL = SAMPLE_IMAGE_URL
 	}
 
-	description := fmt.Sprintf("%d", id)
-	if memo != "" {
-		description += fmt.Sprintf(" %s", memo)
+	description := memo
+	if description == "" {
+		description += "Empty memo"
 	}
 	return linebot.NewCarouselColumn(
 		imageURL,
 		title,
 		description,
 		linebot.NewURIAction("View detail", url),
-		linebot.NewPostbackAction("Delete", fmt.Sprintf("action=delete&id=%d", id), "", ""),
+		linebot.NewPostbackAction("Delete", fmt.Sprintf("action=delete&url=%s", url), "", ""),
 	)
 }
 

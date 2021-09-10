@@ -5,10 +5,6 @@ Description: LINE bot of UTNA Food service template
 Parameters:
   FunctionName:
     Type: String
-  UTNAFoodTableName:
-    Type: String
-  RegistrationStatusTableName:
-    Type: String
   APIName:
     Type: String
   DatabaseStackName:
@@ -96,8 +92,6 @@ Resources:
           LINE_BOT_CHANNEL_TOKEN: !Ref LINEBotChannelToken
           UTNA_FOOD_TABLE_NAME:
             Fn::ImportValue: !Sub "${DatabaseStackName}-UTNAFoodTableName"
-          REGISTRATION_STATUS_TABLE_NAME:
-            Fn::ImportValue: !Sub "${DatabaseStackName}-UTNAFoodRegistrationStatusTableName"
 
   LambdaPermission:
     Type: "AWS::Lambda::Permission"

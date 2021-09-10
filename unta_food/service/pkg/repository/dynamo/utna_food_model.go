@@ -9,20 +9,18 @@ import (
 )
 
 type utnaFood struct {
-	ID        int64  `dynamo:"id"`
-	URL       string `dynamo:"url" index:"URLIndex"`
+	URL       string `dynamo:"url"`
 	ImageURL  string `dynamo:"imageUrl"`
 	Title     string `dynamo:"title"`
 	Memo      string `dynamo:"memo"`
 	UpdatedAt int64  `dynamo:"updatedAt"`
 }
 
-func toModel(input entity.UTNAEntityFood, id int64, title, imageURL string) utnaFood {
+func toModel(input entity.UTNAEntityFood, title, imageURL string) utnaFood {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
 	return utnaFood{
-		ID:        id,
 		URL:       input.URL,
 		ImageURL:  imageURL,
 		Title:     title,
@@ -36,10 +34,10 @@ func toEntity(input utnaFood) entity.UTNAEntityFood {
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
 	return entity.UTNAEntityFood{
-		ID:       input.ID,
-		URL:      input.URL,
-		ImageURL: input.ImageURL,
-		Title:    input.Title,
-		Memo:     input.Memo,
+		URL:       input.URL,
+		ImageURL:  input.ImageURL,
+		Title:     input.Title,
+		Memo:      input.Memo,
+		UpdatedAt: input.UpdatedAt,
 	}
 }

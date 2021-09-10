@@ -18,13 +18,12 @@ func (d *Dynamo) Put(ctx context.Context, input entity.UTNAEntityFood) error {
 		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), "already registered")
 		return errors.New("already registered")
 	}
-	rs := d.getRegisterStatus(ctx)
 
 	ogp := utils.FetchOGP(input.URL)
 	title := utils.FetchTitle(ogp)
 	imageURL := utils.FetchImageURL(ogp)
 
-	if err := d.utnaFood.Put(toModel(input, rs.Number+1, title, imageURL)).Run(); err != nil {
+	if err := d.utnaFood.Put(toModel(input, title, imageURL)).Run(); err != nil {
 		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
 		return err
 	}
@@ -39,22 +38,7 @@ func (d *Dynamo) Update(ctx context.Context, input entity.UTNAEntityFood) error 
 	title := utils.FetchTitle(ogp)
 	imageURL := utils.FetchImageURL(ogp)
 
-	if err := d.utnaFood.Put(toModel(input, input.ID, title, imageURL)).Run(); err != nil {
-		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
-		return err
-	}
-	return nil
-}
-
-func (d *Dynamo) UpdateRegisterStatus(ctx context.Context, isAdd bool) error {
-	rs := d.getRegisterStatus(ctx)
-
-	if isAdd {
-		rs.Number += 1
-	} else {
-		rs.Number -= 1
-	}
-	if err := d.putRegisterStatus(ctx, rs.Number); err != nil {
+	if err := d.utnaFood.Put(toModel(input, title, imageURL)).Run(); err != nil {
 		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
 		return err
 	}
@@ -79,12 +63,12 @@ func (d *Dynamo) GetAll(ctx context.Context) ([]entity.UTNAEntityFood, error) {
 	return rsl, nil
 }
 
-func (d *Dynamo) Delete(ctx context.Context, id int64) (*entity.UTNAEntityFood, error) {
+func (d *Dynamo) Delete(ctx context.Context, url string) (*entity.UTNAEntityFood, error) {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
 	var oldValue utnaFood
-	err := d.utnaFood.Delete("id", id).OldValue(&oldValue)
+	err := d.utnaFood.Delete("url", url).OldValue(&oldValue)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +78,7 @@ func (d *Dynamo) Delete(ctx context.Context, id int64) (*entity.UTNAEntityFood, 
 
 func (d *Dynamo) getWithURL(ctx context.Context, url string) (*utnaFood, error) {
 	var rsl utnaFood
-	if err := d.utnaFood.Get("url", url).Index("URLIndex").One(&rsl); err != nil {
+	if err := d.utnaFood.Get("url", url).One(&rsl); err != nil {
 		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
 		return nil, err
 	}
