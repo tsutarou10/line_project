@@ -10,6 +10,10 @@ import (
 )
 
 const HELP_MESSAGE = `・get: 登録されてから行っていない飲食店の情報を取得できます。
+	一覧の各種ボタン説明
+   View detail: リンクに飛びます。
+   Went: 飲食店に行ったことを登録します。
+   Delete: 情報を削除します。
   一度行ったことのある飲食店の情報は update コマンドで更新しないと表示されないので注意してください。
 
 ・飲食店のURL メモ: 飲食店の情報とそのメモを登録できます。（メモは任意)
@@ -20,6 +24,9 @@ const HELP_MESSAGE = `・get: 登録されてから行っていない飲食店�
   既に行ったことのある飲食店に再度行きたくなった場合も update コマンドを用いて再度情報更新してください。
 
 ・history: 既に行ったことのある飲食店一覧を取得できます。
+  一覧の各種ボタン説明
+	 View detail: リンクに飛びます。
+	 Want to go again: もう一度行きたい時に押してください。get コマンドで取得できるようになります。
 		`
 
 func replyMessageOfMessage(req events.APIGatewayProxyRequest, mp methodPackage, src interface{}) error {
