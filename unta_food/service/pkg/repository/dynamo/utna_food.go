@@ -20,7 +20,11 @@ func (d *Dynamo) Put(ctx context.Context, input entity.UTNAEntityFood) error {
 	}
 	rs := d.getRegisterStatus(ctx)
 
-	if err := d.utnaFood.Put(toModel(input, rs.Number+1)).Run(); err != nil {
+	ogp := utils.FetchOGP(input.URL)
+	title := utils.FetchTitle(ogp)
+	imageURL := utils.FetchImageURL(ogp)
+
+	if err := d.utnaFood.Put(toModel(input, rs.Number+1, title, imageURL)).Run(); err != nil {
 		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
 		return err
 	}
@@ -30,7 +34,12 @@ func (d *Dynamo) Put(ctx context.Context, input entity.UTNAEntityFood) error {
 func (d *Dynamo) Update(ctx context.Context, input entity.UTNAEntityFood) error {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
-	if err := d.utnaFood.Put(toModel(input, input.ID)).Run(); err != nil {
+
+	ogp := utils.FetchOGP(input.URL)
+	title := utils.FetchTitle(ogp)
+	imageURL := utils.FetchImageURL(ogp)
+
+	if err := d.utnaFood.Put(toModel(input, input.ID, title, imageURL)).Run(); err != nil {
 		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
 		return err
 	}

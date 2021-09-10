@@ -13,6 +13,10 @@ import (
 	"github.com/tsutarou10/line_project/service/pkg/entity"
 )
 
+var (
+	SAMPLE_IMAGE_URL = "https://utna-food-artifact-bucket.s3.ap-northeast-1.amazonaws.com/assets/images/rice.jpeg"
+)
+
 type Webhook struct {
 	Destination string           `json:"destination"`
 	Events      []*linebot.Event `json:"events"`
@@ -114,7 +118,7 @@ func ReplyCurousel(req events.APIGatewayProxyRequest, wc WebhookContext, src []e
 
 	var ccList []*linebot.CarouselColumn
 	for _, s := range src {
-		cc := CreateCarouselColumn(s.Memo, s.URL, s.ID)
+		cc := CreateCarouselColumn(s.Title, s.Memo, s.URL, s.ImageURL, s.ID)
 		ccList = append(ccList, cc)
 	}
 	ct := CreateCarouselTemplate(ccList)
@@ -122,26 +126,33 @@ func ReplyCurousel(req events.APIGatewayProxyRequest, wc WebhookContext, src []e
 		"this is a carousel template with imageAspectRatio",
 		ct,
 	)
-	b, err := bot.ReplyMessage(wc.ReplyToken, resp).Do()
-	log.Print(b)
-	log.Print(err)
+	out, err := bot.ReplyMessage(wc.ReplyToken, resp).Do()
+	log.Printf("[RESP]: %v", out)
+	log.Printf("[ERROR]: %v", err)
 }
 
 func CreateCarouselTemplate(columns []*linebot.CarouselColumn) *linebot.CarouselTemplate {
 	return linebot.NewCarouselTemplate(columns...).WithImageOptions("rectangle", "cover")
 }
 
-func CreateCarouselColumn(memo, url string, id int64) *linebot.CarouselColumn {
+func CreateCarouselColumn(title, memo, url, imageURL string, id int64) *linebot.CarouselColumn {
+	if len(title) == 0 {
+		title = "Empty title"
+	}
+	if len(title) > 40 {
+		title = title[:40]
+	}
+	if len(imageURL) == 0 {
+		imageURL = SAMPLE_IMAGE_URL
+	}
 
 	description := fmt.Sprintf("%d", id)
 	if memo != "" {
 		description += fmt.Sprintf(" %s", memo)
-	} else {
-		description += fmt.Sprintf(" %s", url)
 	}
 	return linebot.NewCarouselColumn(
-		"",
-		"",
+		imageURL,
+		title,
 		description,
 		linebot.NewURIAction("View detail", url),
 		linebot.NewPostbackAction("Delete", fmt.Sprintf("action=delete&id=%d", id), "", ""),
