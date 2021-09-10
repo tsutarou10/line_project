@@ -9,7 +9,7 @@ import (
 type UTNAFoodInputPort interface {
 	HandleRegister(context.Context, entity.UTNAEntityFood) error
 	HandleGetAll(context.Context) error
-	HandleDelete(context.Context, int64) error
+	HandleDelete(context.Context, string) error
 	HandleUpdate(context.Context, entity.UTNAEntityFood) error
 }
 

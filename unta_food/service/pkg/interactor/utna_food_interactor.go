@@ -36,10 +36,6 @@ func (i *interactor) HandleRegister(ctx context.Context, input entity.UTNAEntity
 		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
 		return err
 	}
-	if err := i.dynamo.UpdateRegisterStatus(ctx, true); err != nil {
-		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
-		return err
-	}
 	i.out.EmitRegister(ctx, input)
 	return nil
 }
@@ -57,16 +53,12 @@ func (i *interactor) HandleGetAll(ctx context.Context) error {
 	return nil
 }
 
-func (i *interactor) HandleDelete(ctx context.Context, id int64) error {
+func (i *interactor) HandleDelete(ctx context.Context, url string) error {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
-	res, err := i.dynamo.Delete(ctx, id)
+	res, err := i.dynamo.Delete(ctx, url)
 	if err != nil {
-		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
-		return err
-	}
-	if err := i.dynamo.UpdateRegisterStatus(ctx, false); err != nil {
 		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
 		return err
 	}
