@@ -9,11 +9,12 @@ import (
 )
 
 type utnaFood struct {
-	URL       string `dynamo:"url"`
-	ImageURL  string `dynamo:"imageUrl"`
-	Title     string `dynamo:"title"`
-	Memo      string `dynamo:"memo"`
-	UpdatedAt int64  `dynamo:"updatedAt"`
+	URL         string `dynamo:"url"`
+	ImageURL    string `dynamo:"imageUrl"`
+	Title       string `dynamo:"title"`
+	Memo        string `dynamo:"memo"`
+	IsCompleted bool   `dynamo:isCompleted"`
+	UpdatedAt   int64  `dynamo:"updatedAt"`
 }
 
 func toModel(input entity.UTNAEntityFood, title, imageURL string) utnaFood {
@@ -21,11 +22,12 @@ func toModel(input entity.UTNAEntityFood, title, imageURL string) utnaFood {
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
 	return utnaFood{
-		URL:       input.URL,
-		ImageURL:  imageURL,
-		Title:     title,
-		Memo:      input.Memo,
-		UpdatedAt: time.Now().Unix(),
+		URL:         input.URL,
+		ImageURL:    imageURL,
+		Title:       title,
+		IsCompleted: input.IsCompleted,
+		Memo:        input.Memo,
+		UpdatedAt:   time.Now().Unix(),
 	}
 }
 
@@ -34,10 +36,11 @@ func toEntity(input utnaFood) entity.UTNAEntityFood {
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
 	return entity.UTNAEntityFood{
-		URL:       input.URL,
-		ImageURL:  input.ImageURL,
-		Title:     input.Title,
-		Memo:      input.Memo,
-		UpdatedAt: input.UpdatedAt,
+		URL:         input.URL,
+		ImageURL:    input.ImageURL,
+		Title:       input.Title,
+		IsCompleted: input.IsCompleted,
+		Memo:        input.Memo,
+		UpdatedAt:   input.UpdatedAt,
 	}
 }

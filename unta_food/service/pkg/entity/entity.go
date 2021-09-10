@@ -1,9 +1,10 @@
 package entity
 
 type UTNAEntityFood struct {
-	Title     string
-	URL       string
-	ImageURL  string
-	Memo      string
-	UpdatedAt int64
+	Title       string
+	URL         string
+	ImageURL    string
+	Memo        string
+	IsCompleted bool
+	UpdatedAt   int64
 }
