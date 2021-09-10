@@ -166,6 +166,10 @@ func CreateQuickResponse(msg, url, buttonMsg string) linebot.SendingMessage {
 		linebot.NewQuickReplyItems(
 			linebot.NewQuickReplyButton(
 				"",
+				linebot.NewPostbackAction("登録情報を取得", "action=get", "", ""),
+			),
+			linebot.NewQuickReplyButton(
+				"",
 				linebot.NewURIAction(buttonMsg, url),
 			),
 		),

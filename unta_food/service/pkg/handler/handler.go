@@ -68,12 +68,6 @@ func newAPIGatewayProxyReseponse(statusCode int, err error, request events.APIGa
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
-	if statusCode != 200 {
-		utils.ReplyMessageUsingAPIGWRequest(request, err.Error())
-	} else {
-		utils.ReplyMessageUsingAPIGWRequest(request, "success")
-	}
-
 	return events.APIGatewayProxyResponse{
 		StatusCode: statusCode,
 		Body:       fmt.Sprintf(`{"message:""$s"}`+"\n", http.StatusText(statusCode)),
@@ -112,6 +106,6 @@ func setupAPIGatewayAdapter() (*controller.Controller, *presenter.Presenter) {
 
 func raiseHandlerError(statusCode int, err error, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
-	utils.ReplyMessageUsingAPIGWRequest(req, err.Error())
+	utils.ReplyMessageWithQuickResponse(req, err.Error(), README_URL, "LINE Botの使用方法")
 	return newAPIGatewayProxyReseponse(statusCode, err, req), err
 }

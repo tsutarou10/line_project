@@ -11,6 +11,10 @@ import (
 	"github.com/tsutarou10/line_project/service/pkg/utils"
 )
 
+var (
+	README_URL = "https://github.com/tsutarou10/line_project/blob/main/unta_food/README.md"
+)
+
 func updateHandlerOfMessage(ctx context.Context, req events.APIGatewayProxyRequest) (interface{}, error) {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
@@ -19,7 +23,6 @@ func updateHandlerOfMessage(ctx context.Context, req events.APIGatewayProxyReque
 	log.Printf("%s, %s", utils.GetFuncName(), req.Body)
 	if err := c.UpdateController(ctx, req); err != nil {
 		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
-		utils.ReplyMessageUsingAPIGWRequest(req, err.Error())
 		return nil, err
 	}
 	return p.WaitForUpdateCompleted(ctx)
@@ -33,7 +36,6 @@ func registerHandlerOfMessage(ctx context.Context, req events.APIGatewayProxyReq
 	log.Printf("%s, %s", utils.GetFuncName(), req.Body)
 	if err := c.RegisterController(ctx, req); err != nil {
 		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
-		utils.ReplyMessageUsingAPIGWRequest(req, err.Error())
 		return nil, err
 	}
 	return p.WaitForRegisterCompleted(ctx)
@@ -54,7 +56,6 @@ func getAllHandlerOfMessage(ctx context.Context, req events.APIGatewayProxyReque
 	log.Printf("%s, %s", utils.GetFuncName(), req.Body)
 	if err := c.GetAllController(ctx, req); err != nil {
 		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
-		utils.ReplyMessageUsingAPIGWRequest(req, err.Error())
 		return nil, err
 	}
 	return p.WaitForGetAllCompleted(ctx)
@@ -68,7 +69,6 @@ func deleteHandlerOfMessage(ctx context.Context, req events.APIGatewayProxyReque
 	log.Printf("%s, %s", utils.GetFuncName(), req.Body)
 	if err := c.DeleteController(ctx, req); err != nil {
 		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
-		utils.ReplyMessageUsingAPIGWRequest(req, err.Error())
 		return nil, err
 	}
 	return p.WaitForDeleteCompleted(ctx)
@@ -112,6 +112,7 @@ func replyMessage(req events.APIGatewayProxyRequest, mp methodPackage, src inter
 		}
 		wc := utils.ExtractWebhookContext(*wh)
 		utils.ReplyCurousel(req, *wc, s)
+		return nil
 	case entity.UTNAEntityFood:
 		switch mp.Method {
 		case "delete":
@@ -135,7 +136,6 @@ func replyMessage(req events.APIGatewayProxyRequest, mp methodPackage, src inter
 		default:
 			msg = s.URL
 		}
-		utils.ReplyMessageUsingAPIGWRequest(req, msg)
 	default:
 		switch mp.Method {
 		case "help":
@@ -147,12 +147,18 @@ func replyMessage(req events.APIGatewayProxyRequest, mp methodPackage, src inter
 
 ・delete id: 該当する id の飲食店を削除します。id は get コマンドで確認できます。
 		`
-			readmeURL := "https://github.com/tsutarou10/line_project/blob/main/unta_food/README.md"
-			utils.ReplyMessageWithQuickResponse(req, msg, readmeURL, "使い方の詳細")
 		default:
 			msg = "success"
-			utils.ReplyMessageUsingAPIGWRequest(req, msg)
 		}
+	}
+	if msg == "" {
+		msg = "success"
+	}
+	err := utils.ReplyMessageWithQuickResponse(req, msg, README_URL, "LINE Botの使用方法")
+	log.Printf("[MESSAGE]: %s", msg)
+	if err != nil {
+		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
+		return err
 	}
 	return nil
 }
