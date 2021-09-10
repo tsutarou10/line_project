@@ -5,10 +5,6 @@ Description: LINE bot of UTNA Food service template
 Parameters:
   FunctionName:
     Type: String
-  UTNAFoodTableName:
-    Type: String
-  RegistrationStatusTableName:
-    Type: String
   APIName:
     Type: String
   DatabaseStackName:
