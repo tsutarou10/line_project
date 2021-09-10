@@ -12,6 +12,7 @@ type UTNAFoodInputPort interface {
 	HandleDelete(context.Context, string) error
 	HandleUpdate(context.Context, entity.UTNAEntityFood) error
 	HandleVisit(context.Context, string) error
+	HandleGetVisitedRestaurant(context.Context) error
 }
 
 type UTNAFoodOutputPort interface {
@@ -20,4 +21,5 @@ type UTNAFoodOutputPort interface {
 	EmitDelete(context.Context, entity.UTNAEntityFood)
 	EmitUpdate(context.Context, entity.UTNAEntityFood)
 	EmitVisit(context.Context, string)
+	EmitGetVisitedRestaurant(context.Context, []entity.UTNAEntityFood)
 }

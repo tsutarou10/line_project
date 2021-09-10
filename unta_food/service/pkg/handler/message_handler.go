@@ -26,6 +26,9 @@ func createMethodPackageOfMessage(req events.APIGatewayProxyRequest) (*methodPac
 	case "get":
 		mp.Foc = getAllHandlerOfMessage
 		mp.Method = "get"
+	case "history":
+		mp.Foc = getVisitedRestaurantOfMessage
+		mp.Method = "history"
 	case "delete":
 		mp.Foc = deleteHandlerOfMessage
 		mp.Method = "delete"
@@ -86,6 +89,19 @@ func getAllHandlerOfMessage(ctx context.Context, req events.APIGatewayProxyReque
 		return nil, err
 	}
 	return p.WaitForGetAllCompleted(ctx)
+}
+
+func getVisitedRestaurantOfMessage(ctx context.Context, req events.APIGatewayProxyRequest) (interface{}, error) {
+	log.Printf("[START] :%s", utils.GetFuncName())
+	defer log.Printf("[END] :%s", utils.GetFuncName())
+
+	c, p := setupAPIGatewayAdapter()
+	log.Printf("%s, %s", utils.GetFuncName(), req.Body)
+	if err := c.GetVisitedRestaurantController(ctx, req); err != nil {
+		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
+		return nil, err
+	}
+	return p.WaitForGetVisitedRestaurantCompleted(ctx)
 }
 
 func deleteHandlerOfMessage(ctx context.Context, req events.APIGatewayProxyRequest) (interface{}, error) {

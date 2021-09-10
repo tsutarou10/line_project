@@ -49,5 +49,23 @@ func (d *VisitedRestaurantDynamo) Put(ctx context.Context, ogpTag entity.OGPTag)
 		return err
 	}
 	return nil
+}
 
+func (d *VisitedRestaurantDynamo) Scan(ctx context.Context) ([]entity.UTNAEntityFood, error) {
+	log.Printf("[START] :%s", utils.GetFuncName())
+	defer log.Printf("[END] :%s", utils.GetFuncName())
+
+	var resDynamo []visitedRestaurant
+	err := d.visited.Scan().All(&resDynamo)
+	log.Printf("[HOGE]: %v", resDynamo)
+	if err != nil {
+		return nil, err
+	}
+
+	var rsl []entity.UTNAEntityFood
+	for _, r := range resDynamo {
+		rsl = append(rsl, toEntity(r))
+	}
+
+	return rsl, nil
 }

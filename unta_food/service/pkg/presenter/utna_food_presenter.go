@@ -14,6 +14,7 @@ type Presenter struct {
 	getAllCh   chan interface{}
 	deleteCh   chan interface{}
 	completeCh chan interface{}
+	visitedCh  chan interface{}
 }
 
 func NewPresenter() *Presenter {
@@ -21,6 +22,7 @@ func NewPresenter() *Presenter {
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
 	return &Presenter{
+		make(chan interface{}),
 		make(chan interface{}),
 		make(chan interface{}),
 		make(chan interface{}),

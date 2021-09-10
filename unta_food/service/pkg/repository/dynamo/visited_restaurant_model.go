@@ -27,3 +27,16 @@ func toModelOfVisitedRestaurant(input entity.UTNAEntityFood) visitedRestaurant {
 		UpdatedAt: input.UpdatedAt,
 	}
 }
+
+func toEntity(input visitedRestaurant) entity.UTNAEntityFood {
+	log.Printf("[START] :%s", utils.GetFuncName())
+	defer log.Printf("[END] :%s", utils.GetFuncName())
+
+	return entity.UTNAEntityFood{
+		URL:       input.URL,
+		ImageURL:  input.ImageURL,
+		Title:     input.Title,
+		Memo:      input.Memo,
+		UpdatedAt: input.UpdatedAt,
+	}
+}
