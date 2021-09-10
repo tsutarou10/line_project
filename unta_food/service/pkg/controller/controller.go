@@ -2,15 +2,29 @@ package controller
 
 import (
 	"log"
-	"net/url"
 
+	"github.com/tsutarou10/line_project/service/pkg/usecase"
 	"github.com/tsutarou10/line_project/service/pkg/utils"
 )
 
-func isURL(s string) bool {
+type Controller struct {
+	in usecase.UTNAFoodInputPort
+}
+
+func NewController(in usecase.UTNAFoodInputPort) *Controller {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
-	u, err := url.Parse(s)
-	return err == nil && u.Scheme != "" && u.Host != ""
+	return &Controller{in}
+}
+
+func createMemo(src []string) string {
+	rsl := ""
+	for i, s := range src {
+		rsl += s
+		if i != len(src)-1 {
+			rsl += " "
+		}
+	}
+	return rsl
 }
