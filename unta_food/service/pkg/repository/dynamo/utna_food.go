@@ -84,3 +84,25 @@ func (d *Dynamo) getWithURL(ctx context.Context, url string) (*utnaFood, error) 
 	}
 	return &rsl, nil
 }
+
+func (d *Dynamo) PutCompleted(ctx context.Context, url string) error {
+	log.Printf("[START] :%s", utils.GetFuncName())
+	defer log.Printf("[END] :%s", utils.GetFuncName())
+
+	ogp := utils.FetchOGP(url)
+	title := utils.FetchTitle(ogp)
+	imageURL := utils.FetchImageURL(ogp)
+
+	input := entity.UTNAEntityFood{
+		URL:         url,
+		ImageURL:    imageURL,
+		IsCompleted: true,
+	}
+
+	if err := d.utnaFood.Put(toModel(input, title, imageURL)).Run(); err != nil {
+		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
+		return err
+	}
+	return nil
+
+}

@@ -13,6 +13,7 @@ type Presenter struct {
 	registerCh chan interface{}
 	getAllCh   chan interface{}
 	deleteCh   chan interface{}
+	completeCh chan interface{}
 }
 
 func NewPresenter() *Presenter {
@@ -20,6 +21,7 @@ func NewPresenter() *Presenter {
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
 	return &Presenter{
+		make(chan interface{}),
 		make(chan interface{}),
 		make(chan interface{}),
 		make(chan interface{}),
@@ -47,10 +49,16 @@ func (p *Presenter) EmitGetAll(ctx context.Context, output []entity.UTNAEntityFo
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
 	go func() {
-		sort.Slice(output, func(i, j int) bool {
-			return output[i].UpdatedAt < output[j].UpdatedAt
+		var res []entity.UTNAEntityFood
+		for _, o := range output {
+			if !o.IsCompleted {
+				res = append(res, o)
+			}
+		}
+		sort.Slice(res, func(i, j int) bool {
+			return res[i].UpdatedAt < res[j].UpdatedAt
 		})
-		p.getAllCh <- output
+		p.getAllCh <- res
 	}()
 }
 

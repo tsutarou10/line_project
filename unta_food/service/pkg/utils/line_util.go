@@ -155,6 +155,7 @@ func CreateCarouselColumn(title, memo, url, imageURL string) *linebot.CarouselCo
 		title,
 		description,
 		linebot.NewURIAction("View detail", url),
+		linebot.NewPostbackAction("Went", fmt.Sprintf("action=complete&url=%s", url), "", ""),
 		linebot.NewPostbackAction("Delete", fmt.Sprintf("action=delete&url=%s", url), "", ""),
 	)
 }

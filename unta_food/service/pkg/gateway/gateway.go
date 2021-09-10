@@ -11,4 +11,5 @@ type DynamoGateway interface {
 	GetAll(context.Context) ([]entity.UTNAEntityFood, error)
 	Delete(context.Context, string) (*entity.UTNAEntityFood, error)
 	Update(context.Context, entity.UTNAEntityFood) error
+	PutCompleted(context.Context, string) error
 }

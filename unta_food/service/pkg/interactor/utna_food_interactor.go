@@ -49,6 +49,7 @@ func (i *interactor) HandleGetAll(ctx context.Context) error {
 		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
 		return err
 	}
+
 	i.out.EmitGetAll(ctx, res)
 	return nil
 }
