@@ -4,48 +4,68 @@ import (
 	"context"
 	"errors"
 	"log"
+	"os"
+	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/guregu/dynamo"
 	"github.com/tsutarou10/line_project/service/pkg/entity"
 	"github.com/tsutarou10/line_project/service/pkg/utils"
 )
 
-func (d *Dynamo) Put(ctx context.Context, input entity.UTNAEntityFood) error {
+type UTNAFoodDynamo struct {
+	utnaFood dynamo.Table
+}
+
+func NewUTNAFoodDynamo() *UTNAFoodDynamo {
+	log.Printf("[START] :%s", utils.GetFuncName())
+	defer log.Printf("[END] :%s", utils.GetFuncName())
+
+	db := dynamo.New(
+		session.New(),
+		aws.NewConfig().
+			WithRegion(os.Getenv("REGION")).
+			WithEndpoint(os.Getenv("DYNAMODB_ENDPOINT")),
+	)
+	utnaFood := db.Table(os.Getenv("UTNA_FOOD_TABLE_NAME"))
+	return &UTNAFoodDynamo{
+		utnaFood: utnaFood,
+	}
+}
+
+func (d *UTNAFoodDynamo) Put(ctx context.Context, input entity.UTNAEntityFood) error {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
 	tmp, _ := d.getWithURL(ctx, input.URL)
 	if tmp != nil {
-		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), "already registered")
-		return errors.New("already registered")
+		errMsg := "既に登録されています。情報更新する場合は update コマンドを用いてください。"
+		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), errMsg)
+		return errors.New(errMsg)
 	}
 
-	ogp := utils.FetchOGP(input.URL)
-	title := utils.FetchTitle(ogp)
-	imageURL := utils.FetchImageURL(ogp)
+	input.UpdatedAt = time.Now().Unix()
 
-	if err := d.utnaFood.Put(toModel(input, title, imageURL)).Run(); err != nil {
+	if err := d.utnaFood.Put(toModelOfUTNAFood(input)).Run(); err != nil {
 		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
 		return err
 	}
 	return nil
 }
 
-func (d *Dynamo) Update(ctx context.Context, input entity.UTNAEntityFood) error {
+func (d *UTNAFoodDynamo) Update(ctx context.Context, input entity.UTNAEntityFood) error {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
-	ogp := utils.FetchOGP(input.URL)
-	title := utils.FetchTitle(ogp)
-	imageURL := utils.FetchImageURL(ogp)
-
-	if err := d.utnaFood.Put(toModel(input, title, imageURL)).Run(); err != nil {
+	if err := d.utnaFood.Put(toModelOfUTNAFood(input)).Run(); err != nil {
 		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
 		return err
 	}
 	return nil
 }
 
-func (d *Dynamo) GetAll(ctx context.Context) ([]entity.UTNAEntityFood, error) {
+func (d *UTNAFoodDynamo) GetAll(ctx context.Context) ([]entity.UTNAEntityFood, error) {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
@@ -57,13 +77,13 @@ func (d *Dynamo) GetAll(ctx context.Context) ([]entity.UTNAEntityFood, error) {
 
 	var rsl []entity.UTNAEntityFood
 	for _, r := range resDynamo {
-		rsl = append(rsl, toEntity(r))
+		rsl = append(rsl, toEntityOfUTNAFood(r))
 	}
 
 	return rsl, nil
 }
 
-func (d *Dynamo) Delete(ctx context.Context, url string) (*entity.UTNAEntityFood, error) {
+func (d *UTNAFoodDynamo) Delete(ctx context.Context, url string) (*entity.UTNAEntityFood, error) {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
@@ -72,37 +92,15 @@ func (d *Dynamo) Delete(ctx context.Context, url string) (*entity.UTNAEntityFood
 	if err != nil {
 		return nil, err
 	}
-	res := toEntity(oldValue)
+	res := toEntityOfUTNAFood(oldValue)
 	return &res, nil
 }
 
-func (d *Dynamo) getWithURL(ctx context.Context, url string) (*utnaFood, error) {
+func (d *UTNAFoodDynamo) getWithURL(ctx context.Context, url string) (*utnaFood, error) {
 	var rsl utnaFood
 	if err := d.utnaFood.Get("url", url).One(&rsl); err != nil {
 		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
 		return nil, err
 	}
 	return &rsl, nil
-}
-
-func (d *Dynamo) PutCompleted(ctx context.Context, url string) error {
-	log.Printf("[START] :%s", utils.GetFuncName())
-	defer log.Printf("[END] :%s", utils.GetFuncName())
-
-	ogp := utils.FetchOGP(url)
-	title := utils.FetchTitle(ogp)
-	imageURL := utils.FetchImageURL(ogp)
-
-	input := entity.UTNAEntityFood{
-		URL:         url,
-		ImageURL:    imageURL,
-		IsCompleted: true,
-	}
-
-	if err := d.utnaFood.Put(toModel(input, title, imageURL)).Run(); err != nil {
-		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
-		return err
-	}
-	return nil
-
 }

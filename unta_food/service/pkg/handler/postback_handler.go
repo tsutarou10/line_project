@@ -17,6 +17,7 @@ func createMethodPackageOfPostback(req events.APIGatewayProxyRequest) (*methodPa
 	}
 	wc := utils.ExtractWebhookContext(*wh)
 	var mp methodPackage
+	mp.RequestType = "postback"
 	switch strings.ToLower(wc.ReceivedPostBackData["action"]) {
 	case "delete":
 		mp.Foc = deleteHandlerOfPostback
@@ -24,9 +25,9 @@ func createMethodPackageOfPostback(req events.APIGatewayProxyRequest) (*methodPa
 	case "get":
 		mp.Foc = getHandlerOfPostback
 		mp.Method = "get"
-	case "complete":
-		mp.Foc = completeHandlerOfPostback
-		mp.Method = "complete"
+	case "visit":
+		mp.Foc = visitHandlerOfPostback
+		mp.Method = "visit"
 	}
 	return &mp, nil
 }
@@ -57,15 +58,15 @@ func getHandlerOfPostback(ctx context.Context, req events.APIGatewayProxyRequest
 	return p.WaitForGetAllCompleted(ctx)
 }
 
-func completeHandlerOfPostback(ctx context.Context, req events.APIGatewayProxyRequest) (interface{}, error) {
+func visitHandlerOfPostback(ctx context.Context, req events.APIGatewayProxyRequest) (interface{}, error) {
 	log.Printf("[START] :%s", utils.GetFuncName())
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
 	c, p := setupAPIGatewayAdapter()
 	log.Printf("%s, %s", utils.GetFuncName(), req.Body)
-	if err := c.CompleteControllerOfPostback(ctx, req); err != nil {
+	if err := c.VisitControllerOfPostback(ctx, req); err != nil {
 		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
 		return nil, err
 	}
-	return p.WaitForCompleteCompleted(ctx)
+	return p.WaitForVisitCompleted(ctx)
 }

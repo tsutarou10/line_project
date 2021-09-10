@@ -16,6 +16,7 @@ aws cloudformation deploy \
   --capabilities CAPABILITY_NAMED_IAM \
   --parameter-overrides \
     UTNAFoodTableName=${UTNA_FOOD_TABLE_NAME} \
+		VisitedRestaurantTableName=${VISITED_RESTAURANT_TABLE_NAME} \
 
 aws cloudformation describe-stacks \
   --region ${REGION} \

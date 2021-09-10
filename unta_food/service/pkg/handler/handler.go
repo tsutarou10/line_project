@@ -16,12 +16,14 @@ import (
 	"github.com/tsutarou10/line_project/service/pkg/interactor"
 	"github.com/tsutarou10/line_project/service/pkg/presenter"
 	"github.com/tsutarou10/line_project/service/pkg/repository/dynamo"
+	"github.com/tsutarou10/line_project/service/pkg/repository/opengraph"
 	"github.com/tsutarou10/line_project/service/pkg/utils"
 )
 
 type methodPackage struct {
-	Foc    func(context.Context, events.APIGatewayProxyRequest) (interface{}, error)
-	Method string
+	Foc         func(context.Context, events.APIGatewayProxyRequest) (interface{}, error)
+	RequestType string
+	Method      string
 }
 
 func NewHandler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
@@ -36,6 +38,7 @@ func NewHandler(ctx context.Context, request events.APIGatewayProxyRequest) (eve
 	if err != nil {
 		return raiseHandlerError(500, err, request)
 	}
+
 	out, err := mp.Foc(ctx, request)
 	if err != nil {
 		return raiseHandlerError(500, err, request)
@@ -59,6 +62,7 @@ func createMethodPackage(req events.APIGatewayProxyRequest) (*methodPackage, err
 	} else if len(wc.ReceivedPostBackData) != 0 {
 		return createMethodPackageOfPostback(req)
 	}
+
 	errMsg := "invalid method"
 	log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), errMsg)
 	return nil, errors.New(errMsg)
@@ -95,11 +99,15 @@ func setupAPIGatewayAdapter() (*controller.Controller, *presenter.Presenter) {
 	defer log.Printf("[END] :%s", utils.GetFuncName())
 
 	p := presenter.NewPresenter()
-	dynamo := dynamo.NewDynamo()
+	utnaFood := dynamo.NewUTNAFoodDynamo()
+	visited := dynamo.NewVisitedRestaurantDynamo()
+	ogp := opengraph.NewOpenGraph()
 	c := controller.NewController(
 		interactor.NewInputPort(
 			p,
-			dynamo,
+			utnaFood,
+			visited,
+			ogp,
 		))
 	return c, p
 }
@@ -108,4 +116,19 @@ func raiseHandlerError(statusCode int, err error, req events.APIGatewayProxyRequ
 	log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
 	utils.ReplyMessageWithQuickResponse(req, err.Error(), README_URL, "LINE Botの使用方法")
 	return newAPIGatewayProxyReseponse(statusCode, err, req), err
+}
+
+func replyMessage(req events.APIGatewayProxyRequest, mp methodPackage, src interface{}) error {
+	switch mp.RequestType {
+	case "message":
+		return replyMessageOfMessage(req, mp, src)
+	case "postback":
+		return replyMessageOfPostback(req, mp, src)
+	}
+	errMsg := "invalid request type"
+	if err := utils.ReplyMessageWithQuickResponse(req, errMsg, README_URL, "LINE Botの使用方法"); err != nil {
+		log.Printf("[ERROR]: %s, %s", utils.GetFuncName(), err.Error())
+		return err
+	}
+	return errors.New(errMsg)
 }

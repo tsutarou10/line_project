@@ -2,6 +2,8 @@ package utils
 
 import (
 	"fmt"
+	"log"
+	"net/url"
 	"runtime"
 	"strings"
 )
@@ -19,6 +21,9 @@ func GetFuncName() string {
 }
 
 func SplitMultiSep(s string, sep []string) []string {
+	log.Printf("[START] :%s", GetFuncName())
+	defer log.Printf("[END] :%s", GetFuncName())
+
 	var ret []string
 	ret = strings.Split(s, sep[0])
 	if len(sep) > 1 {
@@ -29,4 +34,12 @@ func SplitMultiSep(s string, sep []string) []string {
 		ret = ret2
 	}
 	return ret
+}
+
+func IsURL(s string) bool {
+	log.Printf("[START] :%s", GetFuncName())
+	defer log.Printf("[END] :%s", GetFuncName())
+
+	u, err := url.Parse(s)
+	return err == nil && u.Scheme != "" && u.Host != ""
 }
