@@ -15,7 +15,6 @@ readonly ARTIFACT_BUCKET_PREFIX="cloudformation/${SERVICE_NAME}"
 # ==== database ====
 readonly DATABASE_STACK_NAME="${SERVICE_NAME}-database"
 readonly UTNA_FOOD_TABLE_NAME="UTNAFood"
-readonly REGISTRATION_STATUS_TABLE_NAME="UTNAFoodRegistrationStatus"
 
 # ==== service ====
 readonly SERVICE_STACK_NAME="${SERVICE_NAME}-stack"

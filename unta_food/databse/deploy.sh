@@ -16,7 +16,6 @@ aws cloudformation deploy \
   --capabilities CAPABILITY_NAMED_IAM \
   --parameter-overrides \
     UTNAFoodTableName=${UTNA_FOOD_TABLE_NAME} \
-    UTNAFoodRegistrationStatusTableName=${REGISTRATION_STATUS_TABLE_NAME}
 
 aws cloudformation describe-stacks \
   --region ${REGION} \
