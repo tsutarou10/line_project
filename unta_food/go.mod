@@ -9,5 +9,6 @@ require (
 	github.com/gofrs/uuid v4.0.0+incompatible // indirect
 	github.com/guregu/dynamo v1.11.0
 	github.com/line/line-bot-sdk-go v1.3.1-0.20210331082933-22cd2d5061e5
+	github.com/otiai10/opengraph/v2 v2.0.3
 	golang.org/x/net v0.0.0-20210908191846-a5e095526f91 // indirect
 )

@@ -29,7 +29,7 @@
 	```
 * We can access link by putting "View detail" button.
 
-![Get screen](https://user-images.githubusercontent.com/28858993/132770909-f54d4b72-ee1a-4064-bfad-7ecace415ced.jpg)
+![Get screen](https://user-images.githubusercontent.com/28858993/132785900-f7e93332-b96d-48ec-95a7-94fcad19e6a1.jpg)
 
 ### 3. Update restaurant link and memo
 
@@ -64,4 +64,4 @@
 	1. When we send get command, LINE Bot returns carousel of restaurant.
 	2. We can delete restaurant that we want to delete by putting delete button of carousel.
 
-![Delete screen2](https://user-images.githubusercontent.com/28858993/132770979-2ea87704-6b9f-47cb-ab72-4380c3cb3558.jpg)
+![Delete screen2](https://user-images.githubusercontent.com/28858993/132786654-08255280-9d59-4cc4-abf3-6fa7beec3bc9.jpg)
